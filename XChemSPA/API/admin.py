@@ -10,7 +10,7 @@ class SourceWellAdmin(admin.ModelAdmin):
     list_display = ("library_plate", "well", "compound", "concentration")
 
 class LibraryPlateAdmin(admin.ModelAdmin):
-    list_display = ("id", "library", "name", "last_tested", "current")
+    list_display = ("id", "library", "barcode", "last_tested", "current")
 
 class LibraryAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "public", "for_industry")
