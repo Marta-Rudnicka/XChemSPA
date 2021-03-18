@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: XChemSPA-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: XChemSPA
+  template:
+    metadata:
+      labels:
+        app: XChemSPA
+    spec:
+      securityContext:
+        runAsUser: __CHANGE__
+        runAsGroup: __CHANGE__
+      volumes:
+      - name: dls
+        hostPath:
+          path: /dls
+          type: Directory
+      containers:
+      - name: XChemSPA
+        securityContext:
+            privileged: false
+        image: gcr.io/diamond-privreg/xchemapps/XChemSPA:latest
+        ports:
+        - name: http
+          containerPort: 8000
+        volumeMounts:
+        - mountPath: /dls
+          name: dls
+          mountPropagation: HostToContainer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: XChemSPA-service
+spec:
+  ports:
+  - name: http
+    port: 8000
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    app: XChemSPA
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: XChemSPA-ingress
+  annotations:
+    nginx.org/websocket-services: "XChemSPA-service"
+spec:
+  tls:
+  - hosts:
+    - myapp.diamond.ac.uk
+  rules:
+  - host: myapp.diamond.ac.uk
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: XChemSPA-service
+          servicePort: 8000
