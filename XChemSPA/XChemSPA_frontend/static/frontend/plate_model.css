@@ -5,6 +5,7 @@ div#allot{
 	background: white;
 	padding: 2em;
 	border: solid  #ec0000 2px;
+	z-index: 3;
 }
 
 table#crystal-plate-model#crystal-plate-model{

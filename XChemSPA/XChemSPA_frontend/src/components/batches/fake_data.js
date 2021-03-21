@@ -52,6 +52,31 @@ export const libraries1 = [
 				'items':  127 
 			}
 		]
+
+
+export const combinations = [
+			{
+				'id' : 1,
+				'library' : 'DSI_poised', 
+				'plate' : 'plate_name1',
+				'combinations' : 150,
+				'items':  300 
+			},
+			{
+				'id' : 2,
+				'library' : 'York3D', 
+				'plate' : 'plate_name2',
+				'combinations' : 90,
+				'items':  200 
+			}, 
+			{
+				'id' : 3,
+				'library' : 'FragLites', 
+				'plate' : 'plate_name3',
+				'combinations' : 62,
+				'items':  127 
+			}
+		]
 		
 export const libraries2 = [
 			{
@@ -113,3 +138,189 @@ export const crystal_plates2 = [
 							'items' : 86
 						}
 					]
+
+
+
+
+
+const lab1 = [
+	{
+		"source_well" : "A1",
+		"code": "CODE-STRING-1",
+		"smiles": "SMILES_STRING",
+		"drop" : "A1c"
+	},
+	{
+		"source_well" : "A2",
+		"code": "CODE-STRING-2",
+		"smiles": "SMILES_STRING",
+		"drop" : "A1d"
+	},
+		{
+		"source_well" : "A3",
+		"code": "CODE-STRING-3",
+		"smiles": "SMILES_STRING",
+		"drop" : "A3a"
+	},
+		{
+		"source_well" : "A4",
+		"code": "CODE-STRING-4",
+		"smiles": "SMILES_STRING",
+		"drop" : "A3d"
+	},
+		{
+		"source_well" : "A5",
+		"code": "CODE-STRING-5",
+		"smiles": "SMILES_STRING",
+		"drop" : "A7a"
+	},
+		{
+		"source_well" : "A6",
+		"code": "CODE-STRING-6",
+		"smiles": "SMILES_STRING",
+		"drop" : "A7c"
+	},
+		{
+		"source_well" : "A7",
+		"code": "CODE-STRING-7",
+		"smiles": "SMILES_STRING",
+		"drop" : "A7d"
+	},
+		{
+		"source_well" : "A8",
+		"code": "CODE-STRING-8",
+		"smiles": "SMILES_STRING",
+		"drop" : "A8a"
+	},
+		{
+		"source_well" : "A9",
+		"code": "CODE-STRING-9",
+		"smiles": "SMILES_STRING",
+		"drop" : "A9c"
+	},
+		{
+		"source_well" : "A10",
+		"code": "CODE-STRING-10",
+		"smiles": "SMILES_STRING",
+		"drop" : "A9d"
+	}
+]
+
+const lab2 = [
+	{
+		"compounds" : [
+				{
+					"source_well" : "A1",
+					"code": "CODE-STRING-1",
+					"smiles": "SMILES_STRING",
+					"related_crystal" : "Related-Crystal-1",
+					"soak" : 1
+				},
+				{
+					"source_well" : "A2",
+					"code": "CODE-STRING-2",
+					"smiles": "SMILES_STRING",
+					"related_crystal" : "Related-Crystal-2",
+					"soak" : 2
+				}
+		],
+		"drop" : "A11a"
+	},
+	{
+		"compounds" : [
+				{
+					"source_well" : "A3",
+					"code": "CODE-STRING-3",
+					"smiles": "SMILES_STRING",
+					"related_crystal" : "Related-Crystal-3",
+					"soak" : 1
+				},
+				{
+					"source_well" : "A4",
+					"code": "CODE-STRING-4",
+					"smiles": "SMILES_STRING",
+					"related_crystal" : "Related-Crystal-4",
+					"soak" : 2
+				}
+		],
+		"drop" : "A11c"
+	},
+	{
+		"compounds" : [
+				{
+					"source_well" : "A5",
+					"code": "CODE-STRING-5",
+					"smiles": "SMILES_STRING",
+					"related_crystal" : "Related-Crystal-5",
+					"soak" : 1
+				},
+				{
+					"source_well" : "A6",
+					"code": "CODE-STRING-6",
+					"smiles": "SMILES_STRING",
+					"related_crystal" : "Related-Crystal-6",
+					"soak" : 2
+				}
+		],
+		"drop" : "A11d"
+	},
+	{
+		"compounds" : [
+				{
+					"source_well" : "A7",
+					"code": "CODE-STRING-7",
+					"smiles": "SMILES_STRING",
+					"related_crystal" : "Related-Crystal-7",
+					"soak" : 1
+				},
+				{
+					"source_well" : "A8",
+					"code": "CODE-STRING-8",
+					"smiles": "SMILES_STRING",
+					"related_crystal" : "Related-Crystal-8",
+					"soak" : 2
+				}
+		],
+		"drop" : "A12a"
+	},
+	{
+		"compounds" : [
+				{
+					"source_well" : "A9",
+					"code": "CODE-STRING-9",
+					"smiles": "SMILES_STRING",
+					"related_crystal" : "Related-Crystal-9",
+					"soak" : 1
+				},
+				{
+					"source_well" : "A10",
+					"code": "CODE-STRING-10",
+					"smiles": "SMILES_STRING",
+					"related_crystal" : "Related-Crystal-10",
+					"soak" : 2
+				}
+		],
+		"drop" : "B1a"
+	}
+]
+
+export const batches = [
+					{
+						"number" : 1,
+						"library" : "Library1",
+						"libraryPlate" : "b4r-c0d3-1",
+						"crystalPlate" : "X-b4r-c0d3-1",
+						"type" : "single",
+						"crystals" : lab1
+					},
+					{
+						"number" : 2,
+						"library" : "Library1",
+						"libraryPlate" : "b4r-c0d3-1",
+						"crystalPlate" : "X-b4r-c0d3-1",
+						"type" : "multi",
+						"crystals" : lab2
+					}
+				]
+
+export default combinations;

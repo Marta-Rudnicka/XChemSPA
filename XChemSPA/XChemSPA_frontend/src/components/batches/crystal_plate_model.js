@@ -59,7 +59,7 @@ export class CrystalPlateModel extends Component {
 					<table id="crystal-plate-model">
 						<thead>
 							<tr>
-								<th><input type="checkbox" /></th>
+								<th></th>
 								{rowsHeader}
 							</tr>
 						</thead>

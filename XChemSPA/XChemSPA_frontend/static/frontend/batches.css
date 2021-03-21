@@ -1,0 +1,116 @@
+
+div#batches {
+	display: grid;
+	grid-gap: 5px;
+	grid-template-columns: min-content auto;
+}
+
+#batches main {
+	display: grid;
+	grid-template: min-content min-content min-content / auto 200px;
+}
+
+#batches h1 {
+	grid-column: 1/3;
+}
+
+#batches aside {
+	height: 100%;
+	border-right: solid black 1px;
+}
+
+#batches aside table {
+	width: 100%;
+}
+
+#batch-forms{
+	border: solid black 1px;
+	grid-column: 1/2;
+	display: grid;
+	grid-template-columns: auto auto;
+}
+
+#batch-forms-header{
+	grid-column: 1/3;
+}
+
+aside.collapsed {
+	width: 5em;
+	background: #f6f6f6;
+}
+
+aside.collapsed #aside-tables{
+	display: none;
+}
+
+aside.collapsed button#show-sidebar{
+	display: block;
+}
+aside.collapsed button#hide-sidebar {
+	display: none;
+}
+
+aside.show {
+	width: 40em;
+	background: aliceblue;
+}
+
+aside.show #aside-tables{
+	display: block;
+}
+
+button#show-sidebar, button#hide-sidebar {
+	width: 100%;
+}
+
+aside.show button#show-sidebar{
+	display: none;
+}
+aside.show button#hide-sidebar {
+	display: block;
+}
+
+#existing-batches {
+	border: black solid 1px;
+}
+
+#batch-table {
+	grid-column: 1/2;
+	background: aliceblue;
+}
+
+#batch-table table{
+	margin-top: 5px;
+	border: solid 2px #ec0000;
+	border-top: none;
+}
+
+#batch-table caption{
+	border: solid 2px #ec0000;
+	border-bottom: none;
+}
+
+.batch-details {
+	width: 95%;
+	margin-left: auto;
+	margin-right: auto;
+	background: aliceblue;
+	/*border: solid 1px #ec0000;*/
+	border: solid 1px black;
+}
+
+.container-cell {
+	background: #e2e2e2 ;
+}
+
+.container-cell-hidden {
+	display: none;
+}
+.container-cell-hidden table{
+	display: none;
+}
+
+#actions {
+	grid-column: 2/3;
+	grid-row: 3/4
+}
