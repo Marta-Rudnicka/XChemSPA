@@ -68,7 +68,7 @@ class Sidebar extends React.Component {
 					  <label>Choose data file</label>
 					  <input type="file" />
 					  <label>Choose image directory</label>
-					  <input type="file" id="crystal-images" htmlName="crystal-images" webkitdirectory multiple />
+					  <input type="file" id="crystal-images" name="crystal-images" webkitdirectory="true" multiple />
 					  <label>Enter drop volume (nL):</label>
 					  <input type="number" min="1" />
 					  <button type="submit" id="texrank">Upload</button>

@@ -13,7 +13,7 @@ export class BatchDetails extends Component {
 	
 	makeCompoundCells(well, code, smiles){
 		return (
-			<React.Fragment>
+			<React.Fragment key={code}>
 				<td>{well}</td>
 				<td>{code}</td>
 				<td>{smiles}</td>
@@ -46,10 +46,11 @@ export class BatchDetails extends Component {
 		
 		const compoundCells = this.makeCompoundCells(item.source_well, item.code, item.smiles);
 		return (<tr key={crystal.code}>
+					{crystalCell}
 					{compoundCells}
 					{relatedCrystalCell}
 					{soakCell}
-					{crystalCell}
+					
 				</tr>);
 	}
 	
@@ -87,12 +88,12 @@ export class BatchDetails extends Component {
 			<table className="batch-details">
 				<thead>
 					<tr>
+						<th>Drop</th>
 						<th>Source Well</th>
 						<th>Code</th>
 						<th>Smiles</th>
 						{relatedCrystalHeader}
 						{soakHeader}
-						<th>Drop</th>
 					</tr>
 				</thead>
 				<tbody>

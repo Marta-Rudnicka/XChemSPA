@@ -15,7 +15,7 @@ class Source extends Component {
 						<strong>Import options:</strong>
 						<p>
 							<label>
-								<input type="radio" id="add" name="mode" value="add" checked />
+								<input type="radio" id="add" name="mode" value="add" />
 								<span> Import only newly added compounds</span>
 							</label>
 						</p>
