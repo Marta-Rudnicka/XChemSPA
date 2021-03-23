@@ -35,10 +35,13 @@ export class Batches extends Component {
 		this.setState({singleSoak: bool});
 	}
 	
+	componentDidMount(){
+		this.props.switchActive("batches");
+	}
+	
     render() {
 		
 		const source = this.state.singleSoak ? <LibraryPlates libraries={this.state.libraries}/> : <Combinations combinations={this.state.combinations} />;
-		
         return (
             <div id="batches">
 				<h1>Batches</h1>

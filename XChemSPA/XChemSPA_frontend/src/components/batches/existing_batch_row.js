@@ -33,10 +33,6 @@ export class ExistingBatchRow extends Component {
 		else {
 			this.setState({detailsBySoak: false});
 		}
-		
-		console.log('event.target.checked', event.target.value);
-		console.log('event.target', event.target);
-		console.log('event', event);
 	}
 	
     render() {

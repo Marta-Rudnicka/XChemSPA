@@ -26,11 +26,12 @@ export class BatchDetailsBySoak extends Component {
 	makeCompoundRow(compound, crystal){
 		return (
 			<tr key={compound.code}>
+				<td>{crystal.drop}</td>
 				<td>{compound.source_well}</td>
 				<td>{compound.code}</td>
 				<td>{compound.smiles}</td>
 				<td>{compound.related_crystal}</td>
-				<td>{crystal.drop}</td>
+				
 			</tr>
 		);
 	}
@@ -61,22 +62,16 @@ export class BatchDetailsBySoak extends Component {
     render() {
 		
 		const subtables = this.makeContent(this.props.batch, this.countSoaks(this.props.batch));
-		
-		//const subtables = this.props.batch.crystals.map(crystal => {
-		//		return this.makeCompoundRow(crystal.compounds[0], crystal); 
-		//	})
-		
-		//const subtables = this.makeSoakTable(this.props.batch, 0);
-			
+					
 		return(
 			<table className="batch-details">
 				<thead>
 					<tr>
+						<th>Drop</th>
 						<th>Source Well</th>
 						<th>Code</th>
 						<th>Smiles</th>
 						<th>Related Crystal</th>
-						<th>Drop</th>
 					</tr>
 				</thead>
 				<tbody>

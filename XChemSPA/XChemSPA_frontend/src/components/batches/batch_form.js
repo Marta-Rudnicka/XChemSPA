@@ -54,7 +54,7 @@ export class BatchForm extends Component {
 				<form id="soak-type-form" className={this.state.formClass}>
 				  <fieldset>
 					<legend>Choose soak type: </legend>
-					<input type="radio" name="soak-type" id="single" value="single" onClick={() => this.pickSingleSoak()}/>
+					<input type="radio" name="soak-type" id="single" value="single" onClick={() => this.pickSingleSoak()} defaultChecked />
 					<label htmlFor="single">One compound per crystal</label>
 					<br />
 					<input type="radio" name="soak-type" id="multi" value="multi" onClick={() => this.pickMultiSoak()} />
