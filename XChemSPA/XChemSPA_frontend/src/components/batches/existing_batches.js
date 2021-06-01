@@ -33,7 +33,7 @@ export class ExistingBatches extends Component {
 		);
         return (
 				<section id="existing-batches" >
-					<table className="table">
+					<table className="table" id="table">
 						<caption>Existing batches <Hide className={this.state.tableClass} handleClick={this.hideTable} /> <Show className={this.state.showIconClass} handleClick={this.showTable}/></caption>
 						<thead className={this.state.tableClass}>
 							<tr>

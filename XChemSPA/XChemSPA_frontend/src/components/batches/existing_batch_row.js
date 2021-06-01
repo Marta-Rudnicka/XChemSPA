@@ -61,7 +61,9 @@ export class ExistingBatchRow extends Component {
 					</tr>
 					<tr>
 						<td colSpan="7" className={this.state.detailClass}>
-							{this.state.detailsBySoak ? <BatchDetailsBySoak batch={batch} /> : <BatchDetails type={batch.type} crystals={batch.crystals} />}
+							<div className={this.state.detailClass}>
+								{this.state.detailsBySoak ? <BatchDetailsBySoak batch={batch} /> : <BatchDetails type={batch.type} crystals={batch.crystals} />}
+							</div>
 						</td>
 					</tr>
 				</React.Fragment>

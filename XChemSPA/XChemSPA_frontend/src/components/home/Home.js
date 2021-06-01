@@ -1,40 +1,41 @@
 import React from 'react';
 
 class Home extends React.Component {
-	
-	constructor(props) {
-		super(props);
+
+	componentDidMount(){
+		this.props.switchActive("home");
 	}
+	
 	render() {
 		return (
 		<div id="home">
-			<h1>SoakDB Compound Screen Home</h1>
+			<h1>XChemSPA: Compound Screen</h1>
 			<main>
 			<section id="stages">
 				<h2>Manage experiment</h2>
 				<ul>
 					<li>
-						<p><span className="pseudo-link" onClick={() => this.props.handleClick("Compounds", true)}>Compounds</span> </p>
+						<p><a href='/source'>Compounds</a> </p>
 						<p>The page to import the data of previously selected compounds and see summary view of the selection.</p>
 					</li>
 					<li>
-						<p><span className="pseudo-link" onClick={() => this.props.handleClick("Crystals", true)}>Crystals</span> </p>
+						<p><a href='/crystals'>Crystals</a> </p>
 						<p>The page to upload crystal data and make final decision about which crystals to include in the experiment</p>
 					</li>
 					<li>
-						<p><span className="pseudo-link" onClick={() => this.props.handleClick("Batches", true)}>Batches</span> </p>
+						<p><a href='/batches'>Batches</a> </p>
 						<p>The page to match crystals with compounds and create input files for Echo.</p>
 					</li>
 					<li>
-						<p><span className="pseudo-link" onClick={() => this.props.handleClick("Soak", true)}>Soak</span> </p>
+						<p><a href='/soak'>Soak</a> </p>
 						<p>The page to manage the soaking process: create input for Echo and monitor the progress.</p>
 					</li>
 					<li>
-						<p><span className="pseudo-link" onClick={() => this.props.handleClick("Cryo", true)}>Cryo</span> </p>
+						<p><a href='/cryo'>Cryo</a> </p>
 						<p>The page to manage the application of cryoprotectant.</p>
 					</li>
 					<li>
-						<p><span className="pseudo-link" onClick={() => this.props.handleClick("Harvesting", true)}>Cryo</span> </p>
+						<p><a href='/harvesting'>Harvesting</a> </p>
 						<p>Manage exchange of data with Shifter and barcode reader.</p>
 					</li>
 				</ul>

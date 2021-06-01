@@ -19,4 +19,5 @@ from django.urls import path, include
 urlpatterns = [
     path('', include('XChemSPA_frontend.urls')),
     path('', include('XChemSPA_backend.urls')),
+    path('api/', include('API.urls')),
 ]

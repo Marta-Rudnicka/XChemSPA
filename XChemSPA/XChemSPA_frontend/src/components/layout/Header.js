@@ -14,6 +14,8 @@ export class Header extends Component {
 		let source='nav-link';
 		let crystals='nav-link';
 		let batches='nav-link';
+		let soak='nav-link';
+		let cryo='nav-link';
 		
 		switch(this.props.active){
 			case "home":
@@ -28,6 +30,12 @@ export class Header extends Component {
 			case "batches":
 				batches = "nav-link active"
 				break;		
+			case "soak":
+				soak = "nav-link active"
+				break;		
+			case "cryo":
+				soak = "nav-link active"
+				break;		
 		}
 			
         return (
@@ -39,12 +47,12 @@ export class Header extends Component {
 					
 					</ul>
                     <ul className="nav nav-tabs">
-                        <li className="nav-item"><Link to="/" className={home} onClick={event => this.props.switchActive("home")}>Compound screen home </Link></li>
-                        <li className="nav-item"><Link to="/source" className={source} onClick={event => this.props.switchActive("source")}>Source compounds </Link></li>
-                        <li className="nav-item"><Link to="/crystals" className={crystals} onClick={event => this.props.switchActive("crystals")}>Crystals </Link></li>
-                        <li className="nav-item"><Link to="/batches" className={batches} onClick={event => this.props.switchActive("batches")}>Batches </Link></li>
-                        <li className="nav-item"><a className="nav-link" href="#">Soaking </a></li>
-                        <li className="nav-item"><a className="nav-link" href="#">Cryo </a></li>
+                        <li className="nav-item"><Link to="/" className={home}>Compound screen home </Link></li>
+                        <li className="nav-item"><Link to="/source" className={source}>Source compounds </Link></li>
+                        <li className="nav-item"><Link to="/crystals" className={crystals}>Crystals </Link></li>
+                        <li className="nav-item"><Link to="/batches" className={batches}>Batches </Link></li>
+                        <li className="nav-item"><Link to='/soak' className={soak}>Soaking </Link></li>
+                        <li className="nav-item"><Link to='/cryo' className={cryo}>Cryo </Link></li>
                         <li className="nav-item"><a className="nav-link" href="#">Harvesting </a></li>   
                         <li className="nav-item"><a className="nav-link" href="#">Data Collection </a></li>   
                      </ul>

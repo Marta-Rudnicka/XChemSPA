@@ -123,6 +123,10 @@ class Crystals extends React.Component {
 		}
 		this.setState({plates: platesCopy});
 	}
+	
+	componentDidMount(){
+		this.props.switchActive("crystals");
+	}
 		
 	render() {
 		 let output = [];
