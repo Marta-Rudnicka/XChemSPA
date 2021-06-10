@@ -87,13 +87,3 @@ def set_up_proposals(data, library_data, subset_data, compounds_data):
             p.save()        
         proposals.append(p)
     return proposals
-
-def set_up():
-	
-	
-	pr = Preset.objects.create(name="preset1", description="desc")
-		
-	prop = Proposals.objects.create(proposal="proposal1")
-	prop.libraries.add(l1)
-	prop.libraries.add(l2)
-	prop.save()
