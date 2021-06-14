@@ -10,17 +10,12 @@ div#crystal-plates{
 #sidebar{
 	background: white;
 	grid-column: 1/2;
-	/*height: 100%;
-	position: fixed;
-	top: 2px;*/
 }
 
 #crystals form {
 	border: solid black 1px;
-	display: grid;
-	grid-template-columns: auto auto;
-	padding-top: 1em;
-	margin-bottom: 1em;
+	padding: 1em;
+	margin-top: 1em;
 }
 
 #crystals form label {
@@ -31,8 +26,8 @@ div#crystal-plates{
 	grid-column: 1/3;
 }
 
-div {
-	padding: 5px
+#crystals p {
+	grid-column: 1/3;
 }
 
 label {
@@ -41,39 +36,44 @@ label {
 	text-align: right;
 }
 
-input {
-	padding: 0.5em;
-}
-
-input[type="radio"]{
-	grid-column: 1/2;
-	background: red;
-	color: red;
-}
-
-input[type="number"]{
-	width: 5em;
-}
-
 img {
 	padding: 0;
 }
 
-img.bin-pic, img.info-pic, img.show-pic{
+.bin-pic {
+	top: 5px;
+	left: 0;
+}
+
+.info-icon {
+	top: 5px;
+	right: 5px;
+}
+
+.gallery svg {
 	position: absolute;
 	opacity: 0.5;
-	top:0;
-	visibility: visible;
 }
 
-img.bin-pic:hover, img.info-pic:hover, img.show-pic:hover, img.hide-pic:hover, img.show-used-crystals:hover {
+.gallery .bi-info-circle {
+	right: 10px;
+	top: 3px;
+	opacity: 1;
+}
+
+.gallery .bi-chevron-up, .gallery .bi-chevron-down {
+	right: 5px;
+	top: 15px;
+}
+
+.gallery .bi-trash {
+	top: 3px;
+}
+
+/*.bin-pic:hover, .info-icon:hover {*/
+.gallery svg:hover {
 	opacity:1;
 }
-
-img.bin-pic {
-	left:0;
-}
-
 
 .hide-icon {
 	visibility: hidden;
@@ -89,7 +89,7 @@ img.show-pic {
 
 
 .infobox{
-	display: none;
+	display: grid;
 	grid-template-columns: 60% 35%;
 	grid-gap: 5px;
 }
@@ -102,26 +102,14 @@ img.show-pic {
 	text-align: right;
 }
 
-.hidden {
-	display: none;
-	animation: disappear-big;
-}
-
-rejected .hidden .{
-	display: none;
-	animation: disappear-small;
-}
-
-
 .gallery {
 	margin: 5px;
 	position: relative;
 	display: block;
 	padding: 0;
 	border: solid black 2px;
-	animation-name: disappear-big;
-	animation-play-state: paused;
-	animation-iteration-count: infinite;
+	transition: width 2s, height 2s;
+	height: max-content;
 }
 
 .used-div .gallery{
@@ -145,12 +133,30 @@ rejected .hidden .{
 	width: 120px;
 }
 
+.crystal-group {
+	position: relative;
+    overflow-y: scroll;
+    border: solid lightgrey 1px;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-start;
+}
+
 .used-div, .accepted-div, .rejected-div {
 	position: relative;
 }
+
+.accepted-div {
+    height: 500px;
+}
+
+.used-div, .rejected-div {
+	height: 300px;
+}
+
 .show-used-crystals, .hide-used-crystals {
 	position: absolute;
-	top: 3em;
+	top: 15px;
 	left: 5px;
 	opacity: 0.5;
 }
@@ -176,12 +182,6 @@ rejected .hidden .{
 	animation-name: disappear-small;
 	animation-play-state: paused;
 	animation-iteration-count: infinite;
-}
-
-.crystal-group {
-	display: flex;
-	flex-wrap: wrap;
-	justify-content: flex-start;
 }
 
 
@@ -242,27 +242,12 @@ button[type=submit]{
 	display: none;
 }
 
-.all-used, .used, .used-div {
+.all-used, .used, .used-div, .rejected-div {
 	background: grey;
 }
 
 .used-div {
 	position: relative;
-}
-
-.hidden-input input[type="checkbox"] {
-	display: none;
-}
-
-
-input[type="radio"]:checked ~ .infobox {
-	display: grid;
-}
-
-label.show-icon, label.hide-icon {
-	width: 0;
-	margin: 0;
-	padding: 0;
 }
 
 input[type="radio"]:checked ~ .hide-icon {

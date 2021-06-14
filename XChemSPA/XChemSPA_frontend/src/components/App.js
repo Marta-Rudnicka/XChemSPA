@@ -8,12 +8,14 @@ import Crystals from './crystals/Crystals.js';
 import Batches from './batches/Batches.js';
 import Soak from './soak/Soak.js';
 import Cryo from './cryo/Cryo.js';
+import Visit from './visit/Visit.js';
 
 
 import {
   BrowserRouter as Router,
   Switch,
   Route,
+  Redirect,
 } from "react-router-dom";
 
 import { Provider } from 'react-redux';
@@ -23,39 +25,60 @@ class App extends Component {
 	constructor(props){
 		super(props);
 		this.switchActive = this.switchActive.bind(this);
-		this.state = { active: "home"}
+		this.setVisit = this.setVisit.bind(this);
+		this.setProposal = this.setProposal.bind(this);
+		this.state = { 
+			active: "home", 
+			visit: null,
+			proposal: null
+		}
 	}
 	
 	switchActive(string){
 		this.setState({ active: string});
 	}
 	
+	setVisit(string){
+		this.setState({visit: string});
+	}
+
+	setProposal(string){
+		this.setState({proposal: string});
+	}
 	
     render() {
         return (
             <Provider store={store}>
                 <Fragment>
 					<Router>
-						<Header active={this.state.active} />
+						<Header active={this.state.active} visit={this.state.visit} />
 						
 						<Switch>	 
-						  <Route path="/source">
-							<Source switchActive={this.switchActive}/>
+						  <Route path="/source/">
+						  	{this.state.visit ? 
+						  	<Source switchActive={this.switchActive} 
+							  proposal={this.state.proposal}
+							  visit={this.state.visit}
+							  /> : 
+							  <Redirect to="/visit/" /> }
 						  </Route>
-						  <Route path="/crystals">
-							<Crystals switchActive={this.switchActive}/>
+						  <Route path="/crystals/">
+						  {this.state.visit ? <Crystals switchActive={this.switchActive} visit={this.state.visit} proposal={this.state.proposal}/> : <Redirect to="/visit/" /> }
 						  </Route>
-						  <Route path="/batches">
-							<Batches switchActive={this.switchActive}/>
+						  <Route path="/batches/">
+							{this.state.visit ? <Batches switchActive={this.switchActive}/> : <Redirect to="/visit/" /> }
 						  </Route>
-						  <Route path="/soak">
-							<Soak switchActive={this.switchActive}/>
+						  <Route path="/soak/">
+							{this.state.visit ? <Soak switchActive={this.switchActive}/> : <Redirect to="/visit/" /> }
 						  </Route>
-						  <Route path="/cryo">
-							<Cryo switchActive={this.switchActive}/>
+						  <Route path="/cryo/">
+							{this.state.visit ? <Cryo switchActive={this.switchActive}/> : <Redirect to="/visit/" /> }
+						  </Route>
+						  <Route path="/visit/">
+							<Visit switchActive={this.switchActive} setVisit={this.setVisit} setProposal={this.setProposal}/>
 						  </Route>
 						   <Route path="/">
-							<Home switchActive={this.switchActive}/>
+						   {this.state.visit ? <Home switchActive={this.switchActive}/> : <Redirect to="/visit/" /> }
 						  </Route>
 						</Switch>
 					</Router>

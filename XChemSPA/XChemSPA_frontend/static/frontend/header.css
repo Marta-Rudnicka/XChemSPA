@@ -1,0 +1,12 @@
+#header {
+    display: grid;
+    grid-template-columns: auto auto;
+}
+
+.header-visit {
+    border: solid grey 1px ;
+    margin: auto;
+    font-size: 1.2em;
+    padding: 10px;
+    background: aliceblue;
+}

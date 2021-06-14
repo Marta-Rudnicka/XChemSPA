@@ -137,7 +137,8 @@ class CrystalPlate(models.Model):
     name = models.CharField(max_length=100, default="new_plate")
     drop_volume = models.FloatField(blank=True, null=True)
     plate_type = models.CharField(max_length=50, blank=True, null=True)
-
+    visit = models.CharField(max_length=255, blank=True, null=True)
+    
 
 #modified: added more attributes    
 class Crystal(models.Model):
@@ -147,8 +148,8 @@ class Crystal(models.Model):
     #compound = models.ForeignKey(Compounds, on_delete=models.CASCADE, null=True, blank=True) # Compounds is now an inventory model, not used directly in an experiment
     #visit = models.ForeignKey(SoakdbFiles, blank=True, null=True, on_delete=models.CASCADE) # blank/null temporarily added <---- old
     soakdb_file = models.ForeignKey(SoakdbFiles, blank=True, null=True, on_delete=models.CASCADE) # replaces old 'visit' field
-    visit = models.ForeignKey(Visit, blank=True, null=True, on_delete=models.CASCADE) # new 'visit' field for experiments made without SoakDB
-    
+    #visit = models.ForeignKey(Visit, blank=True, null=True, on_delete=models.CASCADE) # new 'visit' field for experiments made without SoakDB
+    visit = models.CharField(max_length=255, blank=True, null=True)
     product = models.CharField(max_length=255, blank=True, null=True)
 
     # model types
@@ -170,7 +171,7 @@ class Crystal(models.Model):
     status = models.CharField(choices=CHOICES, max_length=2, default=PREPROCESSING)
 
     #added SPA attributes
-    crystal_plate = models.ForeignKey(CrystalPlate, blank=True, null=True, on_delete=models.PROTECT)
+    crystal_plate = models.ForeignKey(CrystalPlate, blank=True, null=True, on_delete=models.PROTECT, related_name='crystals')
     well = models.CharField(max_length=4,  blank=True, null=True)
     echo_x = models.IntegerField(blank=True, null=True) #double-check if it shouldn't be float
     echo_y = models.IntegerField(blank=True, null=True) #double-check if it shouldn't be float
@@ -197,12 +198,14 @@ class SpaCompound(models.Model):
 
 
 class CompoundCombination(models.Model):
-	'''for combisoaks and cocktails'''
-	visit = models.ForeignKey(Visit, blank=True, null=True, on_delete=models.PROTECT)
-	number = models.IntegerField(blank=True, null=True)
-	compounds = models.ManyToManyField(SpaCompound)
-	related_crystals = models.CharField(max_length=64, null=True, blank=True)
-	'''if a combination is based on the result of the previous soak,
+    '''for combisoaks and cocktails'''
+	#visit = models.ForeignKey(Visit, blank=True, null=True, on_delete=models.PROTECT)
+    visit = models.CharField(max_length=100, blank=True, null=True)
+    number = models.IntegerField(blank=True, null=True)
+    compounds = models.ManyToManyField(SpaCompound)
+    related_crystals = models.CharField(max_length=64, null=True, blank=True)
+	
+    '''if a combination is based on the result of the previous soak,
 	the crystals based on which the combination is created are recorder
 	as related_crystals'''
 
@@ -265,7 +268,7 @@ class SolventTestingData(SoakAndCryoValues):
 #heavily modified; some attributes added, some moved to Batch
 class Lab(models.Model):
 
-    crystal_name = models.OneToOneField(Crystal, on_delete=models.CASCADE, unique=True, blank=True, null=True)  # changed to foreign key
+    crystal_name = models.OneToOneField(Crystal, on_delete=models.CASCADE, unique=True, blank=True, null=True, related_name="lab_data")  # changed to foreign key
     single_compound = models.ForeignKey(SpaCompound, on_delete=models.CASCADE, null=True, blank=True) # in regular experiments
     compound_combination = models.ForeignKey(CompoundCombination, on_delete=models.CASCADE, null=True, blank=True) # with combisoaks and cocktails
 

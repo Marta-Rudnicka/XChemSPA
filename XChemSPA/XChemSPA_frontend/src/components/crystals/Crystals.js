@@ -1,152 +1,211 @@
 import React from 'react';
 //import './Crystal gallery_files/crystals.css';
 
-import ProposalTable from './proposal_table.js';
 import Sidebar from './crystal_sidebar.js';
-import Navigation from './navigation.js';
-import Main from './crystal_main.js';
 import Plate from './crystallisation_plate.js';
+import axios from 'axios';
+import { deepCopyObjectArray, changeAndTrack } from '../reusable_components/functions.js';
 
-import cryst from './Crystal gallery_files/crystal.png';
 
 
-class Crystal {
-	constructor(well, x, y, score, picture, status){
-		this.well = well;
-		this.x = x;
-		this.y = y;
-		this.score = score;
-		this.picture = picture;
-		this.status = status;
-	}
-}
-
-class PlateData {
-	constructor(proposal, name, crystalArray, dropVolume){
-			this.proposal = proposal;
-			this.name = name;
-			this.crystalArray = crystalArray;
-			this.dropVolume = dropVolume;
-	}
-}
-
-/* TEST DATASET */
-
-const crystal1 = new Crystal("A42", 67, 78, 5, cryst, "accepted");
-const crystal2 = new Crystal("B69", 15, -68, 2, cryst, "used");
-const crystal3 = new Crystal("B54", 18, -68, 7, cryst, "accepted");
-
-const crystal4= new Crystal("A42", 67, 78, 5, cryst, "used");
-const crystal5 = new Crystal("B69", 15, -68, 2, cryst, "rejected");
-const crystal6 = new Crystal("B54", 18, -68, 7, cryst, "used");
-
-const crystal7 = new Crystal("A42", 67, 78, 5, cryst, "accepted");
-const crystal8 = new Crystal("B69", 15, -68, 2, cryst, "accepted");
-const crystal9 = new Crystal("B54", 18, -68, 7, cryst, "accepted");
-
-const crystalArrayPart = new PlateData("123", 'Partially used', [crystal1, crystal2, crystal3], 45);
-const crystalArrayUsed = new PlateData("123", 'All used', [crystal4, crystal5, crystal6], 30);
-const crystalArrayFresh = new PlateData("123", 'Fresh', [crystal7, crystal8, crystal9], 30);
-
-const testData = [crystalArrayUsed, crystalArrayPart, crystalArrayFresh];
-//Will normally be fetched from an API
-/* --------------------------------- */
-
-function deepCopyPlatesArray(array){
-	//this sucks; needs to be changed
-	let output = [];
-	array.forEach(plate => {
-		const plateDeepCopy = JSON.parse(JSON.stringify(plate));
-		output.push(plateDeepCopy);
-	});
-	return output;
-}
-
-function changeStatusBelowScore(plateArray, score, status){
-	console.log('fired changeStatusBelowScore');
-	plateArray.forEach(plate =>{
-		plate.crystalArray.forEach(crystal => {
-			if (crystal.score < score && crystal.status !== 'used'){
-				crystal.status = status;
-			}
-		});
-	});
-}
-
-function changeStatusAboveScore(plateArray, score, status){
-	plateArray.forEach(plate =>{
-		plate.crystalArray.forEach(crystal => {
-			if (crystal.score > score && crystal.status !== 'used'){
-				crystal.status = status;
-			}
-		});
-	});
-}
 
 //function App() {
 class Crystals extends React.Component {
 	
 	constructor(props) {
 		super(props);
-		this.state = {plates: testData};
-		this.changeCrystalStatus = this.changeCrystalStatus.bind(this);
-		this.handleReject = this.handleReject.bind(this);
-		this.handleAccept = this.handleAccept.bind(this);
-		this.filterByScore = this.filterByScore.bind(this);
-	}
-	
-	changeCrystalStatus(plateName, well, newStatus){
-		//TODO - is there a better way that overwriting all of the data?
-		//might cause problems when hundreds of crystals are involved
-		let platesCopy = deepCopyPlatesArray(this.state.plates);
-		const modifiedPlate = platesCopy.find(plate => plate.name === plateName);
-		const modifiedCrystal = modifiedPlate.crystalArray.find(crystal => crystal.well === well);
-		modifiedCrystal.status = newStatus;
-		this.setState({plates: platesCopy});
-		}
 		
-	handleReject(plateName, well){
-		this.changeCrystalStatus(plateName, well, 'rejected');
+
+		this.filterByScore = this.filterByScore.bind(this);
+//		this.acceptByScore = this.acceptByScore.bind(this);
+//		this.rejectByScore = this.rejectByScore.bind(this);
+		this.updateAccepted = this.updateAccepted.bind(this);
+		this.updateRejected = this.updateRejected.bind(this);
+		this.updateUsed = this.updateUsed.bind(this);
+		this.loadData = this.loadData.bind(this);
+		this.changeScore = this.changeScore.bind(this);
+		this.changeCrystalAttribute = this.changeCrystalAttribute.bind(this);
+
+		this.state = {
+			crystal_plates: [],
+			accepted: 0,
+			rejected: 0,
+			used: 0,
+		};
+	}
+
+	componentDidMount(){
+		this.loadData()
+	}
+
+	loadData(){
+		const apiUrl = '/api/crystal_plates/' + this.props.proposal + '/';
+		this.props.switchActive("crystals");
+
+		axios.get(apiUrl)
+        .then(res => {
+        	const crystal_plates = res.data;
+			crystal_plates.forEach(plate => {
+				this.addStatus(plate.crystals);
+			})
+        	this.setState({ crystal_plates })
+     	});
+	}
+
+	addStatus(crystals){
+		let used = 0;
+		let accepted = 0;
+		crystals.forEach(c=>{
+			if (!c.status) {
+				if (c.lab_data){
+					c.status = "used";
+					used ++;
+				}
+				else {
+					c.status = "accepted";
+					accepted ++;
+				}
+			}
+		});
+		this.updateUsed(used);
+		this.updateAccepted(accepted);
+		return crystals;
+	}
+
+	updateAccepted(int){
+		this.setState({accepted: this.state.accepted + int});
+	}
+
+	updateRejected(int){
+		this.setState({rejected: this.state.rejected + int});
+	}
+
+	updateUsed(int){
+		this.setState({used: this.state.used + int});
 	}
 	
-	handleAccept(plateName, well){
-		this.changeCrystalStatus(plateName, well, 'accepted');
+	changeScore(plate_id, well, score){
+		let platesCopy = deepCopyObjectArray(this.state.crystal_plates);
+		for (let i = 0; i < platesCopy.length; i++) {
+			if(platesCopy[i].id === plate_id){
+				const crystal = platesCopy[i].crystals.find(crystal => crystal.well === well);
+				console.log(crystal.well, crystal.score)
+				crystal.score = score;
+				break;
+			}
+		}
+		this.setState({crystal_plates: platesCopy});
 	}
 	
-	filterByScore(rejectLimit, acceptLimit){
-		let platesCopy = deepCopyPlatesArray(this.state.plates);
+	changeCrystalAttribute(plate_id, well, attribute, value){
+		console.log('fired changeCrystalAttribute', plate_id, well, attribute, value)
+		let platesCopy = deepCopyObjectArray(this.state.crystal_plates);
+		for (let i = 0; i < platesCopy.length; i++) {
+			console.log(i)
+			console.log('plate id: ', platesCopy[i].id )
+			if(platesCopy[i].id === plate_id){
+				const crystal = platesCopy[i].crystals.find(crystal => crystal.well === well);
+				console.log(crystal.well)
+				crystal[attribute] = value;
+				break;
+			}
+		}
+		this.setState({crystal_plates: platesCopy});
+	}
+
+	filterByScore(rejectLimit, acceptLimit, rejectScore, acceptScore){
 		if(rejectLimit){
-			changeStatusBelowScore(platesCopy, rejectLimit, "rejected");
+			this.setStatusByScore(rejectLimit, "rejected");
 		}
 		if(acceptLimit){
-			changeStatusAboveScore(platesCopy, acceptLimit, "accepted");
+			this.setStatusByScore(acceptLimit, "accepted");
 		}
-		this.setState({plates: platesCopy});
+		if(rejectScore){
+			this.setStatusByScore(rejectScore, "rejected");
+		}
+		if(acceptScore){
+			this.setStatusByScore(acceptScore, "accepted");
+		}
 	}
-	
-	componentDidMount(){
-		this.props.switchActive("crystals");
+
+	setStatusByScore(score, status){
+		let count = 0;
+
+		this.state.crystal_plates.forEach(plate => {
+			for (let i = 0; i < plate.crystals.length; i++) {
+				if (plate.crystals[i].status === 'used') {
+					continue;
+				}
+				if (this.updateStatus(plate.crystals[i], score, status)){
+					count ++;
+				}
+			}
+		});
+
+		console.log('count: ', count)
+		if (status === "rejected"){
+			this.updateRejected(count);
+			this.updateAccepted(-count);
+		}
+		else{
+			this.updateAccepted(count);
+			this.updateRejected(-count);
+		}
 	}
-		
+
+	updateStatus(crystal, score, status){
+		console.log('updateStatus: ', crystal, score, status)
+		if (isNaN(parseInt(score)) && crystal.score === score){
+			console.log('Nan score')
+			return changeAndTrack(crystal, "status", status);
+		}
+		console.log('number score')
+		if (status==="rejected" && crystal.score < score){
+			console.log('not enough')
+			return changeAndTrack(crystal, "status", status);
+		}
+		else if (status === "accepted" && crystal.score > score){
+			console.log('good enough')
+			return changeAndTrack(crystal, "status", status);
+		}
+		else {
+			console.log('nothing to change')
+			return false;
+		}
+	}
+
 	render() {
 		 let output = [];
-		 this.state.plates.forEach(plate => {
-			output.push( <Plate 
-			crystals={plate.crystalArray} 
-			dropvol={plate.dropVolume} 
-			name={plate.name} 
-			key={plate.name} 
-			handleAccept={this.handleAccept} 
-			handleReject={this.handleReject}
-			/>
-			);
-		});
-		
+		 try {
+			this.state.crystal_plates.forEach(plate => {
+				output.push( <Plate 
+				plate={plate}
+				key={plate.name}
+				updateAccepted={this.updateAccepted}
+				updateRejected={this.updateRejected}
+				updateUsed={this.updateUsed}
+				loadData = {this.loadData}
+				//changeScore = {this.changeScore}
+				changeCrystalAttribute = {this.changeCrystalAttribute}
+				/>
+				);
+			});
+		}
+		catch(TypeError){
+			output = [];
+		}
 		return (
 		<div id="crystals">
 			<h1>Crystal gallery</h1>
 			<main>
-				<Sidebar plates={this.state.plates} filterByScore={this.filterByScore}/>
+				<Sidebar 
+					plates={this.state.crystal_plates} 
+					visit={this.props.visit} 
+					filterByScore={this.filterByScore}
+					accepted = {this.state.accepted}
+					rejected = {this.state.rejected}
+					used = {this.state.used}
+					/>
 				<div id="crystal-plates">
 					{output}
 				</div>
@@ -161,4 +220,4 @@ class Crystals extends React.Component {
 
 export default Crystals;
 
-//				<Main plates={this.state.plates} handleAccept={this.handleAccept} handleReject={this.handleReject} test={this.state.test} />
+//				<Main plates={this.state.crystal_plates} handleAccept={this.handleAccept} handleReject={this.handleReject} test={this.state.test} />

@@ -90,7 +90,7 @@ class ImportForm extends React.Component {
     return (
       <form id="import-compounds" action="/imports/import-compounds/" method="post">
         <CSRFToken />
-        <input type="hidden" name="visit" value="test_proposal_2-1" />
+        <input type="hidden" name="visit" value={this.props.visit} />
         <button type="submit" className="import-button" >Import selected compounds</button>
         <br />
         <strong>Import options:</strong>

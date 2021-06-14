@@ -1,8 +1,7 @@
 import React from 'react';
 import CrystalTile from './crystal_tile.js';
 import cryst from './Crystal gallery_files/crystal.png';
-import hide from './Crystal gallery_files/hide.png';
-import show from './Crystal gallery_files/show.png';
+import {ChevronDown, ChevronUp} from '../reusable_components/icons.js';
 
 //const cryst = '';
 
@@ -14,9 +13,12 @@ class CrystalGroup extends React.Component {
     this.handleHideCrystals = this.handleHideCrystals.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.state = {dummy: 'value',
-				displayGroup: true,}
+				displayGroup: true,
+				crystals: this.props.crystals
+			}
   }
-	
+
+
 	handleClick(well) {
 		this.props.iconAction(well);
 	}
@@ -34,10 +36,11 @@ class CrystalGroup extends React.Component {
 			<CrystalTile
 			crystal = {crystal}
 			key={crystal.well}
-			crystalpic={cryst} 
-			crystalClass={this.props.crystalClass}
-			iconAction={this.props.iconAction}
-			plateName={this.props.plateName}
+			crystalpic={cryst}
+			plate_id = {this.props.plate_id}
+			iconAction = {this.props.iconAction}
+			//changeScore = {this.props.changeScore}
+			changeCrystalAttribute = {this.props.changeCrystalAttribute}
 			/>
 		);
 		
@@ -46,7 +49,8 @@ class CrystalGroup extends React.Component {
 		let showIconClass;
 		
 		if (this.state.displayGroup) {
-			crystalGroupClass = 'crystal-group';
+			//crystalGroupClass = 'crystal-group';
+			crystalGroupClass = this.props.divClass;
 			hideIconClass = "hide-used-crystals";
 			showIconClass = 'hide';
 		}
@@ -57,10 +61,12 @@ class CrystalGroup extends React.Component {
 			}
 			
 		return(
-		<div className={this.props.divClass}>
-			<h3>{this.props.heading}</h3>
-			<img className={showIconClass} src={show} alt="show crystals" onClick={this.handleShowCrystals} />
-			<img className={hideIconClass} src={hide} alt="hide crystals" onClick={this.handleHideCrystals} />
+		<div className="position-container">
+			<div>
+				<h3>{this.props.heading}</h3>
+				<span className={showIconClass}><ChevronDown size="30" handleClick={this.handleShowCrystals} /></span>
+				<span className={hideIconClass}><ChevronUp size="30" handleClick={this.handleHideCrystals} /></span>
+			</div>
 			<div className={crystalGroupClass}>
 				{crystalTiles}
 			</div>
@@ -70,3 +76,6 @@ class CrystalGroup extends React.Component {
 }
 
 export default CrystalGroup;
+
+//			<img className={showIconClass} src={show} alt="show crystals" onClick={this.handleShowCrystals} />
+// <img className={hideIconClass} src={hide} alt="hide crystals" onClick={this.handleHideCrystals} />

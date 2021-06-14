@@ -1,15 +1,15 @@
 import React, { Component } from 'react';
 import ImportForm from './import_form.js';
-import {sel, proposal} from '../batches/fake_data.js';
 import PlateRow from './plate_row.js';
 import axios from 'axios';
+import {groupCompoundsByPlate} from '../reusable_components/functions.js';
 
 class Source extends Component {
   constructor(props){
     super(props);
     this.state = {
-      proposal: null,
       plates: null,
+      proposalData: null,
       compoundCount: 0,
       allUsed: 0,
       allUnused: 0,      
@@ -18,64 +18,47 @@ class Source extends Component {
     
   componentDidMount(){
     this.props.switchActive("source");
+    
+    let apiUrl = '/api/proposals/' + this.props.proposal + '/';
 
-    //const proposalApiUrl = '/api/proposals/' + this.props.proposal;
-    let proposalApiUrl = '/api/proposals/test_proposal_2/';
-
-    axios.get(proposalApiUrl)
+    axios.get(apiUrl)
         .then(res => {
-        const proposal = res.data;
-        this.setState({ proposal })
+        const proposalData = res.data;
+        this.setState({ proposalData })
      });
+     
+     apiUrl = '/api/source_compounds/' + this.props.proposal + '/';
 
-     proposalApiUrl = '/api/source_compounds/test_proposal_2/';
-
-     axios.get(proposalApiUrl)
+     axios.get(apiUrl)
        .then(res => {
-      const compounds = res.data;
-      this.setState({compoundCount: compounds.length})
-      const plates = this.groupCompoundsByPlate(compounds);
-      this.setState({ plates : plates })
-  });
-
-   }
-  
-    groupCompoundsByPlate(compounds){
-      console.log('fired groupCompoundsByPlate')
-      let plates = {};
-      let plates_with_compounds = [];
-      let allUsed = 0;
-      let allUnused = 0;
-
-      compounds.forEach(c => {
-        plates[c.library_name] = c.library_plate;
+        const compounds = res.data;
+        this.setState({compoundCount: compounds.length})
+        const plates = groupCompoundsByPlate(compounds);
+        this.setState({ plates : plates })
       });
 
-      console.log('plates: ', plates);
-      for (const [key, value] of Object.entries(plates)) {
-        let newPlate = {library_name: key, library_plate: value, used: 0, unused: 0};
-        let c = compounds.filter(compound => compound.library_name === newPlate.library_name && compound.library_plate === newPlate.library_plate);
-        c.forEach(compound =>{
-          if (compound.crystal){
-            compound.used = true;
-            newPlate.used ++;
-            allUsed ++;
-          }
-          else{
-            compound.used = false;
-            newPlate.unused ++;
-            allUnused++;
-          }
+      this.getTotals();
+    }
+   
+    componentDidUpdate(pervProps, PrevState){
+      if(PrevState.plates !== this.state.plates){
+        this.getTotals();
+      }
+    }
 
+   getTotals(){
+      try{
+        let used = 0;
+        let unused = 0;
+        this.state.plates.forEach(plate=>{
+          used = used + plate.used;
+          unused = unused + plate.unused;
         });
-        newPlate.compounds = c;
-        plates_with_compounds.push(newPlate)
-      };
-
-      console.log(plates_with_compounds);
-      this.setState({allUsed: allUsed, allUnused: allUnused});
-      return plates_with_compounds;
-
+        this.setState({allUsed: used, allUnused: unused});
+      }
+      catch(TypeError){
+        return;
+      }
     }
 
     render() {
@@ -91,16 +74,14 @@ class Source extends Component {
     catch(err){
       rows = null;
     }
+     
     
-  
-    console.log('this.state.selection: ', this.state.selection);
-    
-        return (
+    return (
         <div id="source">
       <h1>Source compounds</h1>
       <main id="source-main">
         <div id="sidebar">
-        {this.state.proposal ? <ImportForm proposal={this.state.proposal} /> : ""}
+        {this.state.proposalData ? <ImportForm proposal={this.state.proposalData} visit={this.props.visit}/> : ""}
         </div>
         <div>
           <table className="table" data-toggle="table" data-pagination="true" data-search="true" id="table">

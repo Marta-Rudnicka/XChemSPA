@@ -1,14 +1,19 @@
-from XChemSPA_backend.validators import matching_library
 from API.models import Library, LibraryPlate
-from XChemSPA_backend.validators import get_object
 from setups import set_up_library_plates
 from API.models import Proposals, LibrarySubset
-from XChemSPA_backend.validators import (
+from tools.validators import (
+        matching_library,
         extract_subset_id,
         update_error_log,
         valid_import_mode,
         valid_import_library_key,
-        subset_in_proposal
+        subset_in_proposal,
+        get_object,
+        valid_well_name,
+        unique_well_name,
+        valid_coordinates,
+        valid_score,
+        valid_crystal_data
 )
 
 from django.test import TestCase
@@ -226,5 +231,66 @@ class MatchingLibraryTest(TestCase):
         self.assertTrue(matching_library(lib1, sub1_1, err_log))
         self.assertTrue(matching_library(lib3, sub3_2, err_log))
         self.assertEqual(err_log, [])
-        self.assertTrue(matching_library(lib1, sub1_1, err_log))
+        self.assertFalse(matching_library(lib3, sub1_2, err_log))
         self.assertEqual(err_log, [err_str])
+
+class ValidCrystalDataTest(TestCase):
+    '''test valid_crystal_data() and its helpers'''
+
+    def test_valid_crystal_name(self):
+        self.assertTrue(valid_well_name('A01a'))
+        self.assertTrue(valid_well_name('H12d'))
+        self.assertFalse(valid_well_name('H12b'))
+        self.assertFalse(valid_well_name('B2d'))
+        self.assertFalse(valid_well_name('H15a'))
+        self.assertFalse(valid_well_name('K07a'))
+        self.assertFalse(valid_well_name(''))
+        self.assertFalse(valid_well_name([12,7]))
+
+    def test_unique_crystal_name(self):
+        well_names = []
+        self.assertTrue(unique_well_name("A01a", well_names))
+        self.assertTrue(unique_well_name("F10c", well_names))
+        self.assertTrue(unique_well_name("A04d", well_names))
+        self.assertFalse(unique_well_name("A01a", well_names))
+        self.assertFalse(unique_well_name("F10c", well_names))
+        self.assertFalse(unique_well_name("A04d", well_names))
+        self.assertFalse(unique_well_name("A04d", 14))
+        self.assertTrue(unique_well_name([14,2], well_names))
+
+    def test_valid_coordinates(self):
+        self.assertTrue(valid_coordinates(1, 4))
+        self.assertTrue(valid_coordinates(1, -824))
+        self.assertTrue(valid_coordinates("1", "4"))
+        self.assertTrue(valid_coordinates("1", "-824"))
+        self.assertTrue(valid_coordinates("", ""))
+        self.assertFalse(valid_coordinates([], -824))
+        self.assertFalse(valid_coordinates("x", -824))
+        self.assertFalse(valid_coordinates("", 24))
+        self.assertFalse(valid_coordinates("654654654", ""))
+        self.assertFalse(valid_coordinates("dupa", "dupa"))
+
+    def test_valid_score(self):
+        self.assertTrue(valid_score(0))
+        self.assertTrue(valid_score("0"))
+        self.assertTrue(valid_score("9"))
+        self.assertTrue(valid_score(9))
+        self.assertTrue(valid_score("c"))
+        self.assertTrue(valid_score("h"))
+        self.assertTrue(valid_score(""))
+        self.assertFalse(valid_score("11"))
+        self.assertFalse(valid_score(14))
+        self.assertFalse(valid_score("lh"))
+        self.assertFalse(valid_score([1, 2, 3]))
+    
+    def test_valid_crystal_data(self):
+        well_names = []
+        self.assertTrue(valid_crystal_data(['F12a', 150, -879, 6], well_names))
+        self.assertTrue(valid_crystal_data(['F10a', "150", "-879", "6"], well_names))
+        self.assertTrue(valid_crystal_data(['B12a', "" , "", ""], well_names))
+        
+        self.assertFalse(valid_crystal_data(['F11a', "" , "", "6"], well_names))
+        self.assertFalse(valid_crystal_data(['B12a', "" , "", ""], well_names)) #well name not unique any more
+        self.assertFalse(valid_crystal_data(['D11a', "x" , "7", "6"], well_names))
+        self.assertFalse(valid_crystal_data(['F11a', "98" , "jk", "6"], well_names))
+        self.assertFalse(valid_crystal_data(['F11a', "78" , "-567", "lkhkjhkj"], well_names))
