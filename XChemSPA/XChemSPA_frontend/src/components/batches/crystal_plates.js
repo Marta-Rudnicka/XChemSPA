@@ -15,45 +15,56 @@ export class CrystalPlates extends Component {
 	
 	closePlateModel(){
 		this.setState({editedPlate: null});
-		console.log('fired closePlateModel')
 	}
 	
 	openPlateModel(plate){
 		this.setState({editedPlate: plate});
-		console.log('fired openPlateModel on ', plate);
 	}
 	
 	
     render() {
 		let crystalsTotal = 0;
-		const rows = this.props.crystals.map(plate=>{
-			crystalsTotal = crystalsTotal + plate.items;
-			return (
-				<tr key={plate.id} className="crystal-row">
-					<td>{plate.id}</td>
-					<td>{plate.items}</td>
-					<td className="alloted">
-						<span className="alloted-number">[TODO]</span>
-					</td>
-					<td className="edit">
-						<button className="edit-allotment" onClick={() => this.	openPlateModel(plate)}>Edit</button>
-					</td>
-				</tr>
-			)
-		});
-		
-		const models = this.props.crystals.map(plate=>{
-			let display;
-			if(plate === this.state.editedPlate) {
-				display = "";
-			}
-			else{
-				display="hidden";
-			}
-			
-			return (<CrystalPlateModel key={plate.id} plate={plate} closePlateModel={this.closePlateModel} display={display} />);
-			
-		});
+		let allottedTotal = 0;
+		let rows = <tr><td colSpan="4">Loading...</td></tr>;
+		let models = null;
+
+		if (this.props.crystalPlates){
+			rows = this.props.crystalPlates.map((plate, index) =>{
+				crystalsTotal = crystalsTotal + plate.originalSize;
+				allottedTotal = allottedTotal + plate.size
+				return (
+					<tr key={index} className="crystal-row">
+						<td>{plate.name}</td>
+						<td>{plate.originalSize}</td>
+						<td className="alloted">
+							<span className="alloted-number">{plate.size}</span>
+						</td>
+						<td className="edit">
+							<button className="edit-allotment" onClick={() => this.openPlateModel(plate)}>Edit</button>
+						</td>
+					</tr>
+				)
+			});
+
+			models = this.props.crystalPlates.map(plate=>{
+				let display;
+				if(plate === this.state.editedPlate) {
+					display = "crystal-plate-model";
+				}
+				else{
+					display="hidden";
+				}
+				return (<CrystalPlateModel 
+						key={plate.name} 
+						plate={plate} 
+						closePlateModel={this.closePlateModel} 
+						display={display} 
+						updateCrystalsStatus={this.props.updateCrystalsStatus}
+						resizeAndRefresh={this.props.resizeAndRefresh}
+						resetAll={this.props.resetAll}
+						/>)
+			});
+		}
 		
         return (
         <>
@@ -73,8 +84,8 @@ export class CrystalPlates extends Component {
 				<tfoot>
 					<tr>
 						<td><strong>Total:</strong></td>
-						<td id="total-crystals">{crystalsTotal}</td>
-						<td id="total-unused-crystals" className="unused-crystals"></td>
+						<td>{crystalsTotal}</td>
+						<td>{allottedTotal}</td>
 					</tr>
 				</tfoot>
 			</table>

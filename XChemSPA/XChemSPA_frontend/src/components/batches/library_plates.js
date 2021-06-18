@@ -1,20 +1,26 @@
 import React, { Component } from 'react';
 
 export class LibraryPlates extends Component {
+
     render() {
 		let compoundsTotal = 0;
-		const rows = this.props.libraries.map(plate=>{
-			compoundsTotal = compoundsTotal + plate.items;
-			return (
-				<tr key={plate.id}>
-					<td>{plate.library}</td>
-					<td>{plate.plate}</td>
-					<td>{plate.items}</td>
-					<td>TODO</td>
-				</tr>
-			)
-		});
-		
+		let unusedTotal = 0;
+		let rows = <tr><td colSpan="4">Loading...</td></tr>;
+		if (this.props.libraryPlates){
+			rows = this.props.libraryPlates.map((plate, index)=>{
+			compoundsTotal = compoundsTotal + plate.items.length;
+			unusedTotal = unusedTotal + plate.size;
+			
+				return (
+					<tr key={index}>
+						<td>{plate.library_name}</td>
+						<td>{plate.name}</td>
+						<td>{plate.selected}</td>
+						<td>{plate.size}</td>
+					</tr>
+				)
+			});
+		}
         return (
            <table className="table">
 				<caption>Library plates</caption>
@@ -32,7 +38,8 @@ export class LibraryPlates extends Component {
 				<tfoot>
 					<tr>
 						<td colSpan="2"><strong>Total:</strong></td>
-						<td id="total-compounds">{compoundsTotal}</td>
+						<td>{compoundsTotal}</td>
+						<td>{unusedTotal}</td>
 					</tr>
 				</tfoot>
 			</table>

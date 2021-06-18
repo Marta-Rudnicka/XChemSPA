@@ -17,8 +17,6 @@ class Crystals extends React.Component {
 		
 
 		this.filterByScore = this.filterByScore.bind(this);
-//		this.acceptByScore = this.acceptByScore.bind(this);
-//		this.rejectByScore = this.rejectByScore.bind(this);
 		this.updateAccepted = this.updateAccepted.bind(this);
 		this.updateRejected = this.updateRejected.bind(this);
 		this.updateUsed = this.updateUsed.bind(this);
@@ -35,13 +33,12 @@ class Crystals extends React.Component {
 	}
 
 	componentDidMount(){
-		this.loadData()
+		this.loadData();
+		this.props.switchActive("crystals");
 	}
 
 	loadData(){
 		const apiUrl = '/api/crystal_plates/' + this.props.proposal + '/';
-		this.props.switchActive("crystals");
-
 		axios.get(apiUrl)
         .then(res => {
         	const crystal_plates = res.data;

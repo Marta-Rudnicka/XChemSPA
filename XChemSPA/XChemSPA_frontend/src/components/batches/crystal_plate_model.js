@@ -1,12 +1,7 @@
 import React, { Component } from 'react';
 import ModelRow from './model_row.js';
-import Close from '../Icons.js';
-
-const columns= []
-for(let i=1; i < 13; i++){columns.push(i)}
-const rows=['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
-
-// type="checkbox" onChange={event => console.log('z')} 
+import { XIcon } from '../reusable_components/icons.js';
+import { crystalPlateColumns, crystalPlateRows } from '../reusable_components/constants.js';
 
 export class CrystalPlateModel extends Component {
 	constructor(props){
@@ -14,24 +9,107 @@ export class CrystalPlateModel extends Component {
 		this.state = {
 			lastColumn: 12,
 			lastClicked: 12,
+			columns: null,
+			selected: 0,
+			highlighted: 0,
 			}
 	}
 	
+	componentDidMount(){
+		this.setState({columns: this.divideCrystalsIntoColumns()}); 
+	}
+
+	componentDidUpdate(prevProps, prevState){
+		if (prevState.columns === null && this.state.columns !== null){
+			//once you created columns, choose all the crystals
+			this.setToLast(12)
+			this.choose(12);
+		}
+	}
+
+	divideCrystalsIntoColumns(){
+		const str1 = '[A-H]';
+		const str3 = '[acd]';
+		let cols = [];
+
+		crystalPlateColumns.forEach(number => {
+			let newColumn = {id : number }
+			let numStr = String(number);
+			if (numStr.length === 1){
+				numStr = '0' + numStr;
+			}
+			//newColumn.name = "col" + numStr;
+			const pattern = new RegExp(str1 + numStr + str3)
+
+			//get all unused crystals that have the column number in the name
+			newColumn.crystals = this.props.plate.items.filter(crystal => (crystal.well.match(pattern) !== null  && crystal.status !== "used"))
+			
+			newColumn.count = newColumn.crystals.length;
+			cols.push(newColumn);
+		});
+		return cols;
+	}
+
 	setToLast(index){
 		this.setState({lastColumn : index});
+		this.setState({highlighted : this.countCrystals(index)});
 	}
 	
 	reset(){
-		this.setState({lastColumn : this.state.lastClicked});
+		const last = this.state.lastClicked;
+		this.setState({lastColumn : last});
+		this.setState({highlighted : this.countCrystals(last)});
 	}
 	
 	choose(index){
 		this.setState({lastClicked : index});
+		this.setState({selected : this.countCrystals(index)});
 	}
 	
+	countCrystals(columnIndex){
+		if (this.state.columns === null){
+			return 0;
+		}
+		let count = 0;
+		for (let i = 1; i <= columnIndex; i++ ){
+			count = count + this.state.columns[i-1].count;
+		}
+		return count;
+	}
 	
+	saveAllotment(){
+		let plate = this.props.plate;
+		plate.items = [];
+		let newSize = 0;
+		plate.excluded = 0;
+
+		this.state.columns.forEach(column => {
+			if (column.id <= this.state.lastClicked){
+				column.crystals.forEach(crystal => {
+					crystal.status = "unused";
+					plate.items.push(crystal);
+					newSize ++;
+				});
+			}
+			else {
+				column.crystals.forEach(crystal => {
+					crystal.status = "excluded";
+					plate.items.push(crystal);
+					plate.excluded ++;
+				});				
+			}
+		
+		this.props.closePlateModel();
+		});
+
+		if (plate.matchedItems > 0){
+			this.props.resetAll();
+		}
+		this.props.resizeAndRefresh(plate.id, newSize);	
+	}
+
     render() {
-		const rowsHeader = columns.map(index => {
+		const rowsHeader = crystalPlateColumns.map(index => {
 			let thClass;
 			if (index === this.state.lastClicked){
 				thClass = "chosen";
@@ -48,13 +126,26 @@ export class CrystalPlateModel extends Component {
 			);
 		
 		
-		const rowsContent = rows.map(index => <ModelRow key={index} rowIndex={index} lastColumn={this.state.lastColumn} lastClicked={this.state.lastClicked} />);
-        return (
+		
+		const rowsContent = crystalPlateRows.map(index => 
+		<ModelRow 
+			key={index} 
+			rowIndex={index} 
+			lastColumn={this.state.lastColumn} 
+			lastClicked={this.state.lastClicked} 
+		/>);
+        
+		const selected = this.state.selected;
+		const highlighted = this.state.highlighted;
+
+		return (
 				<div id="allot" className={this.props.display}>
-				<Close handleClick={() => this.props.closePlateModel()} className="close-icon" />
+					<XIcon size="20" handleClick={() => this.props.closePlateModel()} />
 					<h2>Allot crystals to the nearest soak - {this.props.plate.name}</h2>
 					<p>If you want to use only some of the crystals today, and save the rest for later, click on the number of the last column you want to use today.</p>
-					<p>Available: [TODO]<br/> Selected: [TODO] <br/> Highlighted: [TODO]</p>
+					<p>Available: {String(this.props.plate.size  + this.props.plate.excluded)}<br/>
+						Selected: {selected} <br/> 
+						Highlighted: {highlighted} </p>
 						
 					<table id="crystal-plate-model">
 						<thead>
@@ -67,7 +158,7 @@ export class CrystalPlateModel extends Component {
 							{rowsContent}
 						</tbody>
 					  </table>
-					  <button>Save</button>
+					  <button onClick={() => this.saveAllotment()}>Save</button><span>(If the plate is currently assigned to a new batch, this will reset all the batches)</span>
 				</div>
          
         );

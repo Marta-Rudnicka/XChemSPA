@@ -1,18 +1,9 @@
-import React, { Component } from 'react';
+import SelectCrystalPlate from './select_crystal_plate.js';
 
-export class SelectLibraryPlate extends Component {
-    render() {
-		const options = this.props.libraries.map(plate => {
-			return <option key={plate.id} value={plate.id}>{plate.library}: {plate.plate}</option>;
-		
-		});
-        return (
-				<select className="lib-plate-selection" onChange={() => console.log('y')}>
-					<option value="null">None / reset selection</option>
-					{options}
-				</select>
-        );
-    }
-}
+export class SelectLibraryPlate extends SelectCrystalPlate {
+	getNameString(plate){
+		return plate.library_name + ': ' + plate.name;
+	}
+} 
 
 export default SelectLibraryPlate

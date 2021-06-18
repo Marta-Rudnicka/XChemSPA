@@ -1,16 +1,28 @@
 import React, { Component } from 'react';
 
 export class SelectCrystalPlate extends Component {
-	
+	getNameString(plate){
+		return plate.name;
+	}
 	render(){
-		const options = this.props.crystals.map(plate => {
-			return <option key={plate.id} value={plate.id}>{plate.name}</option>;
-		
-		});
-		
+		let options = null;
+		if (this.props.plates) {
+			options = this.props.plates.map(plate => {
+				try {
+					return <option key={plate.id} value={plate.id}>{this.getNameString(plate)}</option>;
+				}
+				catch(TypeError){
+					return <option key="x">. . . </option>
+				}
+			});
+		}
         return (
-				<select className="cr-plate-selection" onChange={() => console.log('x')}>
-					<option value="null">None / reset selection</option>
+				<select 
+					className="cr-plate-selection" 
+					onChange={(e) => this.props.handleChange(e.target.value)}
+					value={this.props.value}
+				>
+					<option value='none'>None / reset selection</option>
 					{options}
 				</select>
         );

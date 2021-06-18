@@ -25,9 +25,9 @@ export class ExistingBatches extends Component {
 	}
 	
     render() {
-		const batch_rows = batches.map(batch => {
+		const batch_rows = batches.map((batch, index) => {
 			return (
-				<ExistingBatchRow key={batch.number} batch={batch} />
+				<ExistingBatchRow key={index} batch={batch} />
 				);
 			}
 		);

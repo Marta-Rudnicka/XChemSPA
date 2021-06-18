@@ -40,12 +40,12 @@ export class BatchDetails extends Component {
 		let crystalCell;
 		let statusCell;
 		if (counter === 0) {
-			crystalCell = <td rowSpan={crystalRowSpan}>{crystal.drop}</td>;
+			crystalCell = <td rowSpan={crystalRowSpan} key={crystal.drop}>{crystal.drop}</td>;
 			
 		}
 		
 		const compoundCells = this.makeCompoundCells(item.source_well, item.code, item.smiles);
-		return (<tr key={crystal.code}>
+		return (<tr key={item.code}>
 					{crystalCell}
 					{compoundCells}
 					{relatedCrystalCell}

@@ -41,9 +41,9 @@ export function groupCompoundsByPlate(compounds_array){
 	compounds_array.forEach(c => {
 	  plates[c.library_plate] = c.library_name
 	});
-
+	let i = 0;
 	for (const [key, value] of Object.entries(plates)) {
-	  let newPlate = {library_plate: key, library_name: value, used: 0, unused: 0};
+	  let newPlate = {id: i, library_plate: key, library_name: value, used: 0, unused: 0};
 	  let c = compounds_array.filter(compound => compound.library_name === newPlate.library_name && compound.library_plate === newPlate.library_plate);
 	  c.forEach(compound =>{
 		if (compound.crystal){
@@ -54,10 +54,15 @@ export function groupCompoundsByPlate(compounds_array){
 		  compound.used = false;
 		  newPlate.unused ++;
 		}
-
+		
 	  });
 	  newPlate.compounds = c;
 	  plates_with_compounds.push(newPlate)
+	  i++;
 	};
 	return plates_with_compounds;
   }
+
+export function addStatusToItems(collection, key){
+	console.log('plateholder');
+}

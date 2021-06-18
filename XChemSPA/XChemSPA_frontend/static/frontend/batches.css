@@ -101,7 +101,7 @@ aside.show button#hide-sidebar {
 
 .container-cell {
 	background: #e2e2e2 ;
-	height: 30em;
+	max-height: 30em;
 	overflow: auto;
 }
 
@@ -115,4 +115,18 @@ aside.show button#hide-sidebar {
 #actions {
 	grid-column: 2/3;
 	grid-row: 3/4
+}
+
+ 
+.crystal-plate-model .bi-x-square {
+	position: absolute;
+	top: 3px;
+	right: 3px;
+	cursor: pointer;
+}
+
+.items-left {
+	color: blue;
+	font-size: 1.2em;
+	float: right;
 }

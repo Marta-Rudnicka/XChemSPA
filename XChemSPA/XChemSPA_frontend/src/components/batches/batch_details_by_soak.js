@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import {Show, Hide} from '../Icons.js';
 import {batches} from './fake_data.js';
 
 export class BatchDetailsBySoak extends Component {
@@ -19,7 +18,6 @@ export class BatchDetailsBySoak extends Component {
 				soaks = crystal.compounds.length;
 			}
 		});
-		console.log('soaks: ', soaks);
 		return soaks;
 	}
 	

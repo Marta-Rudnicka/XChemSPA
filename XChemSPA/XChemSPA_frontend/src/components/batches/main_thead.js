@@ -9,7 +9,6 @@ export class MainThead extends Component {
 				<th className="cr-plate">Crystallisation <br/> (destination) plate</th>
 				<th className="drop" >Drops</th>
 				<th className="batch">Batch</th>
-				<th className="items">Batch size</th>
 				<th className="pb-name">PlateBatch Name</th>
 				<th className="checkbox-cell">Select</th>
 			</tr>
