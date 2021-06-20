@@ -17,70 +17,72 @@ export class Match extends Component {
     }
   }
 
+  /*
   componentDidUpdate(prevProps, prevState){
     const s = this.state;
         if(prevState !== s && s.selectedLibPlate === null && s.selectedCrystalPlate === null ){
         	this.props.deleteEmptyMatch();
         }
     }
-  
+  */
   resetMatch(){
     const match = this.props.match;
-    try{
+    console.log('running reset match ', match.size)
+    if(match.libraryPlate){
+      console.log('resetting library plate')
       match.libraryPlate.unmatchItems(match.size);
     }
-    catch(TypeError){
-      //match.libraryPlate might be null, in which case no action is required
-    }
-    try{
+    if(match.crystalPlate){
+      console.log('resettting crystal plate')
       match.crystalPlate.unmatchItems(match.size);
-    }
-    catch(TypeError){
-      //same as above
     }
   }
 
   changeLibraryPlate(id){
     let match = this.props.match;
+    console.log('firing changeLibraryPlate on ', match)
     this.resetMatch();
     match.resetLibraryPlate();
     this.setState({selectedLibPlateId : id});
     if (id !== "none"){
+      //console.log('id !== "none"')
       const libPlate = this.props.libraryPlates.find(plate => plate.id === parseInt(id));
       const newSize = Math.min(libPlate.unmatchedItems, match.crystalPlate.unmatchedItems);
       match.libraryPlate = libPlate;
-	  this.reMatchItems(match, newSize)
+      //console.log('firing reMatchItems from changeLibraryPlate');
+	    this.reMatchItems(match, newSize);
       this.setState({selectedLibPlate : libPlate});
       return;
     }
     this.setState({selectedLibPlate: null});
-	this.props.reNumberBatches();
+	  this.props.reNumberBatches();
   }
 
   changeCrystalPlate(id){
     let match = this.props.match;
+    console.log('firing changeLibraryPlate on ', match)
     this.resetMatch();
     match.resetCrystalPlate();
-    this.setState({selectedCrystalPlate: null, selectedCrystalPlateId : id});
+    this.setState({selectedCrystalPlateId : id});
     if (id !== "none"){
+      //console.log('id !== "none"')
       const crystalPlate = this.props.crystalPlates.find(plate => plate.id === parseInt(id));
       const newSize = Math.min(crystalPlate.unmatchedItems, match.libraryPlate.unmatchedItems);
       match.crystalPlate = crystalPlate;
-	  this.reMatchItems(match, newSize)
-      /*match.addItems(newSize);
-      match.crystalPlate.useItems(newSize);
-      match.libraryPlate.useItems(newSize);*/
+      //console.log('firing reMatchItems from changeCrystalPlate');
+	    this.reMatchItems(match, newSize);
       this.setState({selectedCrystalPlate: crystalPlate});
       return;
     }
     this.setState({selectedCrystalPlate: null});
-	this.props.reNumberBatches();
+	  this.props.reNumberBatches();
   }
 
   reMatchItems(match, size){
-	match.addItems(size);
-	match.crystalPlate.useItems(size);
-	match.libraryPlate.useItems(size);
+    console.log('firing reMatchItems on: ', match);
+	  match.addItems(size);
+	  match.crystalPlate.useItems(size);
+	  match.libraryPlate.useItems(size);
   }
 
   render() {
@@ -88,21 +90,21 @@ export class Match extends Component {
 	let libPlatesValue = null;
 	
 	//not based on state because it is sometimes out of sync
-	try{
+	if(this.props.match.libraryPlate){
 		libPlatesValue = this.props.match.libraryPlate.id;
-		}
-	catch(TypeError){
-		libPlates = this.props.libraryPlates;
+	}
+	else{
+		libPlates = this.props.libraryPlates.filter(plate => plate.unmatchedItems > 0);
 		libPlatesValue = "none";
 	}
 
 	let crystalPlates = [this.props.match.crystalPlate];
 	let crystalPlatesValue = null;
-	try {
+	if(this.props.match.crystalPlate) {
 		crystalPlatesValue = this.props.match.crystalPlate.id;
 	}
-	catch(TypeError){
-		crystalPlates = this.props.crystalPlates;
+	else{
+		crystalPlates = this.props.crystalPlates.filter(plate => plate.unmatchedItems > 0);
 		crystalPlatesValue = "none";
 	}
 

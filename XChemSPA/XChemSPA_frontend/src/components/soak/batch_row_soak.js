@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import {Show, Hide} from '../Icons.js';
 import {batches} from '../batches/fake_data.js';
-import ExistingBatchRow from '../batches/existing_batch_row.js';
-import BatchDetails from '../batches/batch_details.js';
-import BatchDetailsBySoak from '../batches/batch_details_by_soak.js';
+import ExistingBatchRow from '../batches/old-batches/existing_batch_row.js';
+import BatchDetails from '../batches/old-batches/batch_details.js';
+import BatchDetailsBySoak from '../batches/old-batches/batch_details_by_soak.js';
 
 export class BatchRowSoak extends ExistingBatchRow {
 	

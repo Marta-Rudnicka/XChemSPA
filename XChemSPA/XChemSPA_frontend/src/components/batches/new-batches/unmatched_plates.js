@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import SelectLibraryPlate from './select_library_plate.js';
 import SelectCrystalPlate from './select_crystal_plate.js';
-import {Match} from './batchClasses.js'
+import Match from '../data-classes/Match.js'
 
 export class UnmatchedPlates extends Component {
 	constructor(props){
@@ -39,7 +39,7 @@ export class UnmatchedPlates extends Component {
         const l = this.state.selectedLibPlate;
         const c = this.state.selectedCrystalPlate;
         const size = Math.min(l.unmatchedItems, c.unmatchedItems)
-        const match = new Match(l, c, size, [], this.props.batchSize)
+        const match = new Match(l, c, size, this.props.batchSize)
         l.useItems(size);
         c.useItems(size);
         this.props.addMatch(match);
@@ -76,7 +76,7 @@ export class UnmatchedPlates extends Component {
         }
         catch(TypeError){
             return 0;
-        }    
+        }
         return Math.min(crystalsLeft, compoundsLeft);
     }
 

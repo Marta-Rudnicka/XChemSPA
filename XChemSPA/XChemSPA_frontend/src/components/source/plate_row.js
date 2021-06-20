@@ -1,7 +1,7 @@
 import React from 'react';
 import {Show, Hide} from '../Icons.js';
 //import {batches} from '../batches/fake_data.js';
-import ExistingBatchRow from '../batches/existing_batch_row.js';
+import ExistingBatchRow from '../batches/old-batches/existing_batch_row.js';
 import PlateDetails from './plate_details.js';
 //import BatchDetailsBySoak from '../batches/batch_details_by_soak.js';
 

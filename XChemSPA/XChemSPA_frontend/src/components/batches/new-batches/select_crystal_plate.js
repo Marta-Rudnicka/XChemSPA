@@ -11,7 +11,8 @@ export class SelectCrystalPlate extends Component {
 				try {
 					return <option key={plate.id} value={plate.id}>{this.getNameString(plate)}</option>;
 				}
-				catch(TypeError){
+				catch(e){
+					console.error(e)
 					return <option key="x">. . . </option>
 				}
 			});

@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import {Show, Hide, ChevronLeft, ChevronRight} from '../Icons.js';
 import {batches} from '../batches/fake_data.js';
-import BatchDetails from '../batches/batch_details.js';
-import ExistingBatchRow from '../batches/existing_batch_row.js';
+import BatchDetails from '../batches/old-batches/batch_details.js';
+import ExistingBatchRow from '../batches/old-batches/existing_batch_row.js';
 import SoakForm from '../soak/soak_form.js';
 
 export class Cryo extends Component {

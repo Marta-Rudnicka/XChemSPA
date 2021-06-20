@@ -1,19 +1,19 @@
 import React, { Component, useLayoutEffect } from 'react';
-import Sidebar from './sidebar.js';
-import NewBatches from './newBatches';
-import LibraryPlates from './library_plates.js';
-import CrystalPlates from './crystal_plates.js';
-import BatchForm from './batch_form.js';
+import Sidebar from './sidebar/sidebar.js';
+import NewBatches from './new-batches/newBatches';
+import LibraryPlates from './sidebar/library_plates.js';
+import CrystalPlates from './sidebar/crystal_plates.js';
+import BatchForm from './new-batches/batch_form.js';
 import Combinations from './combinations.js';
 import {combinations} from './fake_data.js';
-import ExistingBatches from './existing_batches.js';
+import ExistingBatches from './old-batches/existing_batches.js';
 import { groupCompoundsByPlate} from '../reusable_components/functions.js';
 import axios from 'axios';
-import {Plate} from './batchClasses';
-import UnmatchedPlates from './unmatched_plates.js';
-import Match from './match.js'
+import Plate from './data-classes/Plate.js';
+import UnmatchedPlates from './new-batches/unmatched_plates.js';
+import Match from './new-batches/match.js'
 
-export class Batches extends Component {
+class Batches extends Component {
 	constructor(props){
 		super(props);
 
@@ -148,29 +148,39 @@ export class Batches extends Component {
 		this.setState({matches: matchesCopy});	
 	}
 
-	deleteEmptyMatch(){
-		let matchesCopy = [];
-		this.state.matches.forEach(match=> matchesCopy.push(match.copySelf()));
-		matchesCopy = matchesCopy.filter(match => match.crystalPlate !== null && match.libraryPlate !== null);
+	deleteEmptyMatch(matchesCopy){
+		let prevSize = matchesCopy.length;
+		matchesCopy = matchesCopy.filter(match => match.crystalPlate !== null || match.libraryPlate !== null);
+		if (matchesCopy.length === prevSize){
+			return matchesCopy;
+		}
+		console.log('deleted empty matches')
 		matchesCopy.forEach(match => this.recalculateMatch(match))
-		matchesCopy = this.reNumberBatches(matchesCopy);
-		this.setState({matches: matchesCopy});
+		return matchesCopy;
 	}
 
 	recalculateMatch(match){
 		//re-allocate items after deleting a match
+		console.log('firing recalculateMatch on match: ', match.size, match.libraryPlate, match.crystalPlate)
+		if (match.size === 0){
+			return;
+		}
+		console.log('running recalculateMatch: (lib, cryst): ', match.libraryPlate.name, match.crystalPlate.name)
+		console.log('running recalculateMatch: (lib.unmatched, cryst.unmatched): ', match.libraryPlate.unmatchedItems, match.crystalPlate.unmatchedItems)
 		const leftInLP = match.libraryPlate.unmatchedItems;
 		const leftInCP = match.crystalPlate.unmatchedItems
 		if (leftInLP > 0 && leftInCP > 0 ){
 			const extra = Math.min(leftInLP, leftInCP);
+			match.addItems(extra);
 			match.libraryPlate.useItems(extra);
 			match.crystalPlate.useItems(extra);
-			match.addItems(extra);
+
 			this.reNumberBatchesWrapper();
 		}
 	}
 
 	reNumberBatches(matchArray){
+		matchArray = this.deleteEmptyMatch(matchArray);
 		let i = 1;
 		matchArray.forEach(match => {
 			match.batches.forEach(batch => {
@@ -183,18 +193,14 @@ export class Batches extends Component {
 
 	reNumberBatchesWrapper(){
 		//for methods that do not otherwise process on a copy if this.state.matches
-		try {
+		if (this.state.matches.length > 0)
 			if (this.state.matches.length === 0) {
 				return;
 			}
-			let matchesCopy = [];
-			this.state.matches.forEach(match=> matchesCopy.push(match.copySelf()));
-			matchesCopy = this.reNumberBatches(matchesCopy);
-			this.setState({matches: matchesCopy});
-		}
-		catch(TypeError){
-			//not loaded yet
-		}
+		let matchesCopy = [];
+		this.state.matches.forEach(match=> matchesCopy.push(match.copySelf()));
+		matchesCopy = this.reNumberBatches(matchesCopy);
+		this.setState({matches: matchesCopy});
 	}
 
 	resizeAndRefresh(plate_id, newSize){
@@ -209,29 +215,27 @@ export class Batches extends Component {
 		this.state.matches.forEach(match => {
 			match.libraryPlate.unmatchItems(match.size);
 			match.crystalPlate.unmatchItems(match.size);
-			match.reset();
+			//match.reset();
 		});
 
-		this.deleteEmptyMatch();
+		//this.deleteEmptyMatch();
+		this.setState({matches : []});
 	}
 
 	checkDataIntegrity(){
+		if (!this.state.libraryPlates || !this.state.crystalPlates){
+			return;
+		}
 		if (this.state.matches === []){
-			try {
-				this.state.libraryPlates.forEach(plate => {
-					console.assert(plate.matchedItems === 0, 'leftover matched items in %s', plate.name);
-				})
-			}
-			catch(TypeError){
-				console.assert(this.state.libraryPlates === null, 'inavlid value for this.state.libraryPlates')
-			}
-			try {
+			if(this.state.libraryPlates)
+			this.state.libraryPlates.forEach(plate => {
+				console.assert(plate.matchedItems === 0, 'leftover matched items in %s', plate.name);
+			});
+			
+			if(this.state.crystalPlates){
 				this.state.crystalPlates.forEach(plate => {
 					console.assert(plate.matchedItems === 0, 'leftover matched items in %s', plate.name);
-				})
-			}
-			catch(TypeError){
-				console.assert(this.state.crystalPlates === null, 'inavlid value for this.state.libraryPlates')
+				});
 			}
 		}
 
@@ -239,13 +243,8 @@ export class Batches extends Component {
 		let matchedCompounds = 0;
 		let matchedInMatches = 0;
 		this.state.matches.forEach(match => matchedInMatches = matchedInMatches + match.size);
-		try {
-			this.state.crystalPlates.forEach(plate => matchedCrystals = matchedCrystals + plate.matchedItems);
-			this.state.libraryPlates.forEach(plate => matchedCompounds = matchedCompounds + plate.matchedItems);
-		}
-		catch(TypeError){
-			console.assert((this.state.crystalPlates === null || this.state.libraryPlates === null), 'invalid plates')
-		}	
+		this.state.crystalPlates.forEach(plate => matchedCrystals = matchedCrystals + plate.matchedItems);
+		this.state.libraryPlates.forEach(plate => matchedCompounds = matchedCompounds + plate.matchedItems);
 		console.assert(matchedCrystals === matchedCompounds, 'matched crystals and compounds not equal',);
 		console.assert(matchedCompounds === matchedInMatches, 'matched compounds and matches not equal ');
 		console.assert(matchedCrystals === matchedInMatches, 'matched crystals and matches not equal ');

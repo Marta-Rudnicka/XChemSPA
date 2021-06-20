@@ -14,6 +14,7 @@ export class Plate {
 			this.originalSize = plate.originalSize;          
         	this.isLibPlate = isLibPlate;
 			this.used = plate.used;
+			this.usedItems = plate.usedItems;
 			
 			this.library_name = plate.library_name;
 			this.selected = plate.selected;
@@ -43,12 +44,28 @@ export class Plate {
 			this.unmatchedItems = this.size;		
 			this.matchedItems = 0;					
 			this.originalSize = this.size;          
-			this.isLibPlate = isLibPlate;       
+			this.isLibPlate = isLibPlate;
+			this.sortItems();       
 		}    
 	}
 	
 	copySelf(){
 		return new Plate(this, this.isLibPlate);
+	}
+
+	sortItems(){
+		let unused = []
+		let used = []
+		this.items.forEach(item => {
+			if (item.status === "used" || item.used === true){
+				used.push(item)
+			}
+			else {
+				unused.push(item)
+			}
+		});
+		this.items = unused;
+		this.usedItems = used;
 	}
 
 	useItems(number){
@@ -76,6 +93,8 @@ export class Plate {
 			this.unmatchedItems = parseInt(newSize);
 			this.matchedItems = 0;
 		}
+
+		this.checkPlateIntegrity();
 	}
 
 	//for debugging
@@ -91,67 +110,128 @@ export class Plate {
 }
 
 export class Match {
-	constructor(libraryPlate, crystalPlate, size, batches, batchSize){
+	constructor(libraryPlate, crystalPlate, size, batchSize, compounds = [], crystals = [], batches = []){
+		console.log('creating Match: ', libraryPlate, crystalPlate, size, batchSize)
 		this.libraryPlate = libraryPlate;
 		this.crystalPlate = crystalPlate;
 		this.size = size;
 		this.batches = batches;
 		this.batchSize = batchSize;
+		this.compounds = compounds;
+		this.crystals = crystals;
+		this.batches = batches;
 		if (this.batches.length === 0){
+			const items = this.getItemsList(this.size);
+			this.compounds = items.c;
+			this.crystals = items.x;
 			this.makeBatches();
 		}
+		else {
+			console.log('constructor for a clone')
+		}
+		console.log('this.size after constructor: ', this.size)
 	}
 
 	resetLibraryPlate(){
+		console.log('fired resetLibraryPlate')
 		this.libraryPlate = null;
-		this.size = 0;
-		this.batches = [];
+		this.empty();
+		console.log(this.size)
 		this.checkIntegrity();
 	}
 	resetCrystalPlate(){
+		console.log('fired resetCrystalPlate')
 		this.crystalPlate = null;
-		this.size = 0;
-		this.batches = [];
+		this.empty();
+		console.log(this.size)
 		this.checkIntegrity();
+	}
+
+	getItemsList(number){
+		console.log('fired getItemList', number)
+		if (this.libraryPlate && this.libraryPlate.name){
+			console.log(' in: ', this.libraryPlate.name);
+		}
+		if (this.size === 0){
+			return {c : [], x : []}
+		}
+
+		let compounds = null;
+		let crystals = null;
+		const lp = this.libraryPlate;
+		const cp = this.crystalPlate;
+		console.log('lp.matchedItems: ', lp.matchedItems, 'cp.matchedItems: ', cp.matchedItems)
+		compounds = lp.items.slice(lp.matchedItems, lp.matchedItems + number);
+		crystals = cp.items.slice(cp.matchedItems, cp.matchedItems + number);
+		console.log('this.size before exiting getItemsList', this.size)
+		return {c : compounds, x: crystals};
 	}
 
 	reset(){
 		this.libraryPlate = null;
 		this.crystalPlate = null;
+		this.empty();
+	}
+
+	empty(){
 		this.size = 0;
 		this.batches = [];
+		this.crystals = [];
+		this.compounds = [];
 	}
+
 	copySelf(){
-		return new Match(this.libraryPlate, this.crystalPlate, this.size, this.batches, this.batchSize);
+		return new Match(
+			this.libraryPlate, 
+			this.crystalPlate, 
+			this.size, 
+			this.batchSize, 
+			this.compounds, 
+			this.crystals, 
+			this.batches,
+			);
 	}
 
 	addItems(int){
-		this.size = this.size + int;
+		console.log('adding items: ', int, this.libraryPlate.name)
+		const items = this.getItemsList(int)
+		console.log('items: ', items)
+		this.compounds.push(...items.c);
+		this.crystals.push(...items.x);
+		console.log('this.compounds: ', this.compounds, 'this.crystals: ', this.crystals)
 		this.remakeBatches();
-		this.checkIntegrity();
+		//this.checkIntegrity();
 	}
 
 	makeBatches(){
+		console.log('firing makeBatches; this.size: ', this.size)
 		if (this.size === 0 ){
 			return; 					//nothing to do here
 		}
 		if (this.batchSize === 0){ 		// 1 batch per plate
-			const newBatch = new Batch(this.size, this.libraryPlate, this.crystalPlate);
+			console.log('one batch per plate')
+			const newBatch = new Batch(
+				this.libraryPlate, 
+				this.crystalPlate, 
+				this.compounds, 
+				this.crystals
+			);
 			this.batches.push(newBatch);
 		}
 		else{							//fixed batch size
-			for(let i = this.size ; i > 0 ; i = i - this.batchSize){
-				if (i >= this.batchSize){
-					const newBatch = new Batch(this.batchSize, this.libraryPlate, this.crystalPlate);
-					this.batches.push(newBatch);
-				}
-				else {
-					const newBatch = new Batch(i, this.libraryPlate, this.crystalPlate);
-					this.batches.push(newBatch);
-				}
+			console.log('fixed batch size')
+			for(let i = 0 ; i < this.size ; i = i + this.batchSize){
+				const newBatch = new Batch(
+					this.libraryPlate, 
+					this.crystalPlate,
+					this.compounds.slice(i, i + this.batchSize),
+					this.crystals.slice(i, i + this.batchSize)
+				);
+				this.batches.push(newBatch);
 			}
 
 		}
+		console.log('this.size after making batches: ', this.size)
 		this.checkIntegrity();
 	}
 
@@ -169,6 +249,7 @@ export class Match {
 		if ( (this.libraryPlate === null || this.crystalPlate === null) && ( this.size > 0 || this.batches.length > 0 )){
 			throw new RangeError('Match not empty despite missing a plate', this);
 		}
+		
 		let batchSum = 0;
 		this.batches.forEach(batch => batchSum = batchSum + batch.size);
 		if (batchSum !== this.size){
@@ -178,14 +259,15 @@ export class Match {
 }
 
 export class Batch {
-	constructor(size, libraryPlate, crystalPlate){
-		this.size = size;									
+	constructor(libraryPlate, crystalPlate, compounds, crystals){									
 		this.libraryPlate = libraryPlate;					
 		this.crystalPlate = crystalPlate;					
 		this.batchNumber = null;							
-		
-		//this.wells = [];									
-		//this.drops = [];										
+		this.compounds = compounds;
+		this.crystals = crystals;
+		this.size = this.compounds.length;
+		this.checkBatchIntegrity();						
+												
 	}
 	
 	checkBatchIntegrity() {
@@ -193,13 +275,12 @@ export class Batch {
 			throw new RangeError("Negative size of a Batch object; ", this);
 		}
 		
-		if (this.libPlate && (this.size > this.libPlate.size) ) {
-			
-			throw new RangeError('Batch object has more items than its libPlate: ', this);
+		if (this.compounds.length !== this.crystals.length) {
+			throw new RangeError('Different number of crystals and compounds/combinations in a batch: ', this);
 		}
-		
-		if (this.crystalPlate && (this.size > this.crystalPlate.size) ) {
-			throw new RangeError('Batch object has more items than its crystalPlate: ', this);
+		if (this.compounds.length !== this.size) {
+			print('Error in ', this)
+			throw new RangeError('Invalid batch size: ', this);
 		}
 	}
 }

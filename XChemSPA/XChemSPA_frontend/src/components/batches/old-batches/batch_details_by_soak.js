@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import {batches} from './fake_data.js';
 
 export class BatchDetailsBySoak extends Component {
 	constructor(props){

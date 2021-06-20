@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {Show, Hide} from '../Icons.js';
+import {Show, Hide} from '../../Icons.js';
 
 export class BatchForm extends Component {
 	constructor(props){
@@ -8,7 +8,6 @@ export class BatchForm extends Component {
 		this.hideForms = this.hideForms.bind(this);
 		this.showForms = this.showForms.bind(this);
 		this.pickBatchSize = this.pickBatchSize.bind(this);
-//		this.changeCrystalsPerBatch = this.changeCrystalsPerBatch.bind(this);
 		
 		this.state = {
 			combiUpload: 'hidden',
@@ -82,7 +81,7 @@ export class BatchForm extends Component {
 							min="16" 
 							step="16" 
 							value={this.state.crystalsPerBatch} 
-							onChange={() => {return}} //dummy function to silence warnings; chnages handled by the parent div
+							onChange={() => {return}} //dummy function to silence warnings; changes handled by the parent div
 							/> crystals per plate</label>
 					</div>
 				  </fieldset>

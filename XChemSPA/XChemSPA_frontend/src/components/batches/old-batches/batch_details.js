@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import {Show, Hide} from '../Icons.js';
-import {batches} from './fake_data.js';
+import {Show, Hide} from '../../Icons.js';
+import {batches} from '../fake_data.js';
 
 export class BatchDetails extends Component {
 	constructor(props){

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import ModelRow from './model_row.js';
-import { XIcon } from '../reusable_components/icons.js';
-import { crystalPlateColumns, crystalPlateRows } from '../reusable_components/constants.js';
+import { XIcon } from '../../reusable_components/icons.js';
+import { crystalPlateColumns, crystalPlateRows } from '../../reusable_components/constants.js';
 
 export class CrystalPlateModel extends Component {
 	constructor(props){
