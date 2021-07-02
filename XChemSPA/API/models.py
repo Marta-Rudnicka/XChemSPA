@@ -209,7 +209,6 @@ class CompoundCombination(models.Model):
 	the crystals based on which the combination is created are recorder
 	as related_crystals'''
 
-
 #new class
 class SolventNotes(models.Model):
     '''To store user's notes on conclusions from solvent testing; values
@@ -245,6 +244,7 @@ class SoakAndCryoValues(models.Model):
 class SolventBatch(models.Model):
     '''data common to the whole batch of crystals in a solvent testing experiment'''    
     number = models.IntegerField(default=0)
+    visit = models.CharField(max_length=64, blank=True, null=True)
     soak_status = models.CharField(max_length=64, blank=True, null=True)
     soak_time = models.IntegerField(blank=True, null=True)
     cryo_status = models.CharField(max_length=64, blank=True, null=True)
@@ -269,8 +269,8 @@ class SolventTestingData(SoakAndCryoValues):
 class Lab(models.Model):
 
     crystal_name = models.OneToOneField(Crystal, on_delete=models.CASCADE, unique=True, blank=True, null=True, related_name="lab_data")  # changed to foreign key
-    single_compound = models.ForeignKey(SpaCompound, on_delete=models.CASCADE, null=True, blank=True) # in regular experiments
-    compound_combination = models.ForeignKey(CompoundCombination, on_delete=models.CASCADE, null=True, blank=True) # with combisoaks and cocktails
+    single_compound = models.ForeignKey(SpaCompound, on_delete=models.CASCADE, null=True, blank=True, related_name="lab_data") # in regular experiments
+    compound_combination = models.ForeignKey(CompoundCombination, on_delete=models.CASCADE, null=True, blank=True, related_name="lab_data") # with combisoaks and cocktails
 
     #compound = models.OneToOneField(SpaCompound, on_delete=models.CASCADE, unique=True, blank=True, null=True)  #changed to allow cocktails
     #to access crystal_name now: self.compound.crystal
@@ -282,7 +282,7 @@ class Lab(models.Model):
     visit = models.CharField(max_length=64, blank=True, null=True)
 
     #new attributes
-    batch = models.ForeignKey(Batch, blank=True, null=True, on_delete=models.PROTECT) #null for solvent testing
+    batch = models.ForeignKey(Batch, blank=True, null=True, on_delete=models.PROTECT, related_name="crystals") #null for solvent testing
     solvent_data = models.ForeignKey(SolventTestingData, blank=True, null=True, on_delete=models.PROTECT) #null for compound screen
     puck = models.CharField(max_length=100, blank=True, null=True)
     position = models.CharField(max_length=100, blank=True, null=True)

@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import {Show, Hide} from '../../Icons.js';
-import {batches} from '../fake_data.js';
 import BatchDetails from './batch_details.js';
-import BatchDetailsBySoak from './batch_details_by_soak.js';
 
 export class ExistingBatchRow extends Component {
 	constructor(props){
@@ -26,43 +24,49 @@ export class ExistingBatchRow extends Component {
 		this.setState({detailClass: "container-cell-hidden", showClass: "", hideClass: "hidden"})
 	}
 	
-	handleCheckbox(event){
-		if (event.target.checked){
-			this.setState({detailsBySoak: true});
-		}
-		else {
-			this.setState({detailsBySoak: false});
-		}
+	getLibraryCell(){
+		return <td>{this.props.batch.crystals[0].single_compound.library_name}</td>;
+	}
+
+	getPlateCell(){
+		return <td>{this.props.batch.crystals[0].single_compound.library_plate}</td>;
+	}
+
+	getChangeView(){
+		return null; //overwritten in ExistingBatchRowCocktail
+	}
+	
+	getBatchDetails(){
+		return <BatchDetails crystals={this.props.batch.crystals} />
 	}
 	
     render() {
 		const batch = this.props.batch;
+		const libraryCell = this.getLibraryCell();
+		const plateCell = this.getPlateCell();
+		const changeView = this.getChangeView();
+		const details = this.getBatchDetails();
 		
         return (
 				<React.Fragment>
 					<tr>
 						<td>{batch.number}</td>
-						<td>{batch.library}</td>
-						<td>{batch.libraryPlate}</td>
-						<td>{batch.crystalPlate}</td>
+						{libraryCell}
+						{plateCell}
+						
+						<td>{batch.crystal_plate.name}</td>
 						<td>{batch.crystals.length}</td>
 						<td>TODO</td>
 						<td>
 							<Show handleClick={this.showDetails} className={this.state.showClass}/>
 							<Hide Show handleClick={this.hideDetails} className={this.state.hideClass} />
-							{ (batch.type==="multi") ? 
-								<div>
-									<input type="checkbox" onChange={event => this.handleCheckbox(event)} className={this.state.hideClass} />
-									<label className={this.state.hideClass}>view by soak</label>
-								</div> 
-								: null 
-							}
+							{changeView}
 						</td>
-					</tr>
+					</tr>	
 					<tr>
 						<td colSpan="7" className={this.state.detailClass}>
 							<div className={this.state.detailClass}>
-								{this.state.detailsBySoak ? <BatchDetailsBySoak batch={batch} /> : <BatchDetails type={batch.type} crystals={batch.crystals} />}
+								{details}
 							</div>
 						</td>
 					</tr>

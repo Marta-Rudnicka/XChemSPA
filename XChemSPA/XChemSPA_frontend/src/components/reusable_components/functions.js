@@ -46,12 +46,12 @@ export function groupCompoundsByPlate(compounds_array){
 	  let newPlate = {id: i, library_plate: key, library_name: value, used: 0, unused: 0};
 	  let c = compounds_array.filter(compound => compound.library_name === newPlate.library_name && compound.library_plate === newPlate.library_plate);
 	  c.forEach(compound =>{
-		if (compound.crystal){
-		  compound.used = true;
+		if (compound.lab_data.length > 0){
+		  compound.status = "used";
 		  newPlate.used ++;
 		}
 		else{
-		  compound.used = false;
+		  compound.status = "unused";
 		  newPlate.unused ++;
 		}
 		

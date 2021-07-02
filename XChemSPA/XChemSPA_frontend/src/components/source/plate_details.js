@@ -11,7 +11,7 @@ export class PlateDetails extends Component {
 				<td>{compound.well}</td>
 				<td>{compound.code}</td>
 				<td>{compound.smiles}</td>
-				<td>{compound.used ? "Used" : "Unused"}</td>
+				<td>{compound.status}</td>
 			</tr>
 			
 			);

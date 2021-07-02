@@ -1,0 +1,28 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Error log</title>
+	<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://bootswatch.com/4/cosmo/bootstrap.min.css"> 
+    <link rel="stylesheet" href="{% static "frontend/errors.css" %}"> 
+	<link rel="stylesheet" href="{% static "frontend/prep.css" %}">
+</head>
+<body lang="en">
+	<h1>Errors in submitted file</h1>
+	<div>The data in the submitted file could not be saved because the file contains errors. Please correct the errors and try again.</div>
+	<main>
+		<h2>The following errors have been detected:</h2>
+		{{form_errors}}
+		{{non_field_errors}}
+		{% autoescape off %}
+		{% for message in error_log %}
+				<p>{{message}}</p>
+		{% endfor %}
+		{% endautoescape %}
+	</main>
+	<button id="back">Close</button>
+	<script>document.getElementById('back').addEventListener('click', ()=>window.close())</script>
+</body>

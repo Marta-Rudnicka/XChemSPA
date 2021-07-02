@@ -4,14 +4,14 @@ import NewBatches from './new-batches/newBatches';
 import LibraryPlates from './sidebar/library_plates.js';
 import CrystalPlates from './sidebar/crystal_plates.js';
 import BatchForm from './new-batches/batch_form.js';
-import Combinations from './combinations.js';
-import {combinations} from './fake_data.js';
+import Combinations from './sidebar/combinations.js';
 import ExistingBatches from './old-batches/existing_batches.js';
 import { groupCompoundsByPlate} from '../reusable_components/functions.js';
 import axios from 'axios';
 import Plate from './data-classes/Plate.js';
 import UnmatchedPlates from './new-batches/unmatched_plates.js';
 import Match from './new-batches/match.js'
+import { JSON_CSRF } from '../reusable_components/csrf.js'
 
 class Batches extends Component {
 	constructor(props){
@@ -26,15 +26,18 @@ class Batches extends Component {
 		this.reNumberBatchesWrapper = this.reNumberBatchesWrapper.bind(this);
 		this.resizeAndRefresh = this.resizeAndRefresh.bind(this);
 		this.resetAll = this.resetAll.bind(this);
+		this.saveBatches = this.saveBatches.bind(this);
 
 		this.state={
 			asideClass: 'collapsed',
+			existingBatches: null,
 			libraryPlates: null,
 			crystalPlates: null,
-			combinations: combinations,
+			combinations: null,
 			singleSoak: true,
 			matches: [],
 			batchSize : 0,
+			batchStart: 1,
 		}
 	}
 	
@@ -43,6 +46,8 @@ class Batches extends Component {
 		this.props.switchActive("batches");
 		this.loadCompounds();
 		this.loadCrystals();
+		this.loadExistingBatches();
+		this.loadCombinations();
 	}
 	
 	loadCompounds(){
@@ -57,6 +62,7 @@ class Batches extends Component {
 	}
 
 	loadCrystals(){
+
 		const apiUrl = '/api/crystal_plates/' + this.props.proposal + '/';
 		axios.get(apiUrl)
 		.then(res => {
@@ -71,13 +77,37 @@ class Batches extends Component {
 	}
 
 	loadExistingBatches(){
-		console.log('loading existing baches')
+		
+		const apiUrl = '/api/batches/' + this.props.proposal + '/';
+		axios.get(apiUrl)
+		  .then(res => {
+		   const existingBatches = res.data;
+		   this.setState({ existingBatches: existingBatches, batchStart: existingBatches.length + 1 });
+		 });
+	}
+	
+	loadCombinations(){
+		const apiUrl = '/api/combinations/' + this.props.visit + '/';
+
+		axios.get(apiUrl)
+		  .then(res => {
+		   const combinations = res.data;
+		   this.setState({ combinations });
+		   this.processCombinations(combinations);
+		 });
 	}
 
 	componentDidUpdate(prevProps, prevState){
         if(prevState !== this.state){
 			this.checkDataIntegrity();
+			//for debugging
         }
+		if(prevState.combinations === null && this.state.combinations){
+			this.processCombinations(this.state.combinations);
+		}
+		if(prevState.libraryPlates === null && this.state.libraryPlates){
+			this.processCombinations(this.state.combinations);
+		}
     }
 
 	addStatus(plate, items, key){
@@ -115,6 +145,50 @@ class Batches extends Component {
 			newPlates.push(p);
 		});
 		return newPlates;
+	}
+	
+	processCombinations(combinations){
+		if (combinations.length === 0 || !this.state.libraryPlates){
+			return;
+		}
+
+		let combinationsCollection = {library_name : "Compound combinations", library_plate : "", compounds : combinations, id : 99}
+		let unused = 0;
+		let used = 0;
+		combinationsCollection.compounds.forEach(comb => {
+			//combinationCount ++;
+			if (comb.lab_data.length === 0){
+				comb.status = "unused";
+				unused ++;
+			}
+			else {
+				comb.status = "used";
+				used ++;
+			}
+			comb.compounds.forEach(c => {
+				//compoundCount ++;
+				this.markCompoundAsCombined(c);
+			});
+		});
+		
+		combinationsCollection.unused = unused;
+		combinationsCollection.used = used;
+
+		let platesCopy = [];
+		this.state.libraryPlates.forEach(plate=> platesCopy.push(plate.copySelf()));
+		platesCopy.push(new Plate(combinationsCollection, true))
+
+		this.setState({libraryPlates : platesCopy});
+	}
+	
+	markCompoundAsCombined(compound){
+		this.state.libraryPlates.forEach(plate => { 
+			if (plate.library_name === compound.library_name && plate.name === compound.library_plate){
+				let found = plate.items.find( c => compound.code === c.code);
+				found.status = "combined";
+				plate.excludeItems(1) ;
+			}
+		});	
 	}
 
 	//MANAGE DISPLAY
@@ -154,19 +228,16 @@ class Batches extends Component {
 		if (matchesCopy.length === prevSize){
 			return matchesCopy;
 		}
-		console.log('deleted empty matches')
 		matchesCopy.forEach(match => this.recalculateMatch(match))
 		return matchesCopy;
 	}
 
+	//MANAGE DATA MODEL AFTER CHANGING STATE
 	recalculateMatch(match){
 		//re-allocate items after deleting a match
-		console.log('firing recalculateMatch on match: ', match.size, match.libraryPlate, match.crystalPlate)
 		if (match.size === 0){
 			return;
 		}
-		console.log('running recalculateMatch: (lib, cryst): ', match.libraryPlate.name, match.crystalPlate.name)
-		console.log('running recalculateMatch: (lib.unmatched, cryst.unmatched): ', match.libraryPlate.unmatchedItems, match.crystalPlate.unmatchedItems)
 		const leftInLP = match.libraryPlate.unmatchedItems;
 		const leftInCP = match.crystalPlate.unmatchedItems
 		if (leftInLP > 0 && leftInCP > 0 ){
@@ -181,7 +252,7 @@ class Batches extends Component {
 
 	reNumberBatches(matchArray){
 		matchArray = this.deleteEmptyMatch(matchArray);
-		let i = 1;
+		let i = this.state.batchStart;
 		matchArray.forEach(match => {
 			match.batches.forEach(batch => {
 				batch.batchNumber = i;
@@ -222,6 +293,44 @@ class Batches extends Component {
 		this.setState({matches : []});
 	}
 
+	//SUBMIT DATA TO API
+
+	saveBatches(){
+		let token = [JSON_CSRF()]
+		let batches = []
+
+		this.state.matches.forEach(match =>{
+			match.batches.forEach(batch => {
+				batches.push(this.prepareBatchData(batch));
+				//this.createLabObjsInAPI(batch);
+			});
+		});
+
+		let data = new FormData(); 
+		data.append("csrfmiddlewaretoken", token);
+		data.append("batches", JSON.stringify(batches));
+		data.append("visit", this.props.visit)
+
+		const url = '/create-batches/'
+		axios.post(url, data);
+	}
+
+	prepareBatchData(batch){
+		let crystalIds = [];
+		batch.crystals.forEach(crystal => crystalIds.push(crystal.id));
+		let compoundIds = [];
+		batch.compounds.forEach(compound => compoundIds.push(compound.id));
+		let cocktail = false;
+		if (batch.compounds[0].related_crystals !== undefined){
+			cocktail = true;
+		}
+		const batchObj = {batchNumber: batch.batchNumber, crystalPlate : batch.crystalPlate.id, crystals : crystalIds, compounds : compoundIds, cocktail: cocktail}
+		//TODO: sent to create endpoint
+		//console.log('batch: ', batchObj);
+		return batchObj;
+	}
+
+	//ENSURE DATA MAKES SENSE
 	checkDataIntegrity(){
 		if (!this.state.libraryPlates || !this.state.crystalPlates){
 			return;
@@ -246,19 +355,16 @@ class Batches extends Component {
 		this.state.crystalPlates.forEach(plate => matchedCrystals = matchedCrystals + plate.matchedItems);
 		this.state.libraryPlates.forEach(plate => matchedCompounds = matchedCompounds + plate.matchedItems);
 		console.assert(matchedCrystals === matchedCompounds, 'matched crystals and compounds not equal',);
+		//console.log('matchedCrystals: ', matchedCrystals, 'matchedCompounds: ', matchedCompounds, 'matches: ', matchedInMatches);
 		console.assert(matchedCompounds === matchedInMatches, 'matched compounds and matches not equal ');
 		console.assert(matchedCrystals === matchedInMatches, 'matched crystals and matches not equal ');
 	}
 
     render() {
 		
-		const source = this.state.singleSoak ? 
-			<LibraryPlates libraryPlates={this.state.libraryPlates}/> : 
-			<Combinations combinations={this.state.combinations} />;
+		let matches = [];
 		
-			let matches = [];
-		
-			if (this.state.matches){
+		if (this.state.matches){
 			matches = this.state.matches.map((match, index) => {
 				return <Match 
 					key={index} 
@@ -278,7 +384,8 @@ class Batches extends Component {
 					showSidebar = {this.showSidebar}
 					hideSidebar = {this.hideSidebar}
 				>
-					{source}
+					<LibraryPlates libraryPlates={this.state.libraryPlates} combinations={this.state.combinations}/>;
+					{this.state.combinations ? <Combinations combinations={this.state.combinations} /> : null}
 					<CrystalPlates 
 						crystalPlates={this.state.crystalPlates} 
 						resizeAndRefresh={this.resizeAndRefresh}
@@ -286,18 +393,22 @@ class Batches extends Component {
 					/>
 				</Sidebar>
 				<main>
-					<ExistingBatches />
+					<ExistingBatches batches={this.state.existingBatches}/>
 					<BatchForm 
 						changeSingleSoak={this.changeSingleSoak} 
-						setBatchSize={this.setBatchSize} 
+						setBatchSize={this.setBatchSize}
+						visit={this.props.visit}
 					/>
-					<NewBatches>
+					<NewBatches
+						saveBatches = {this.saveBatches}
+						>
 						{matches}
 						<UnmatchedPlates 
 							libraryPlates = {this.state.libraryPlates}
 							crystalPlates = {this.state.crystalPlates}
 							batchSize = {this.state.batchSize}
 							addMatch = {this.addMatch}
+							
 						/>
 					</NewBatches>
 				</main>

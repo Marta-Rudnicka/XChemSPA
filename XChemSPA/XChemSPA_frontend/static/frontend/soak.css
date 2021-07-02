@@ -27,3 +27,7 @@ div#soak{
 .auto-calc {
 	background: aliceblue;
 }
+
+.excluded {
+	opacity: 0.4;
+}

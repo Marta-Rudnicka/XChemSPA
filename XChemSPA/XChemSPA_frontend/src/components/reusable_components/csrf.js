@@ -19,7 +19,7 @@ function getCookie(name) {
 
 
 
-const CSRFToken = () => {
+export const CSRFToken = () => {
   let csrftoken = getCookie('csrftoken');
     
   return (
@@ -27,4 +27,9 @@ const CSRFToken = () => {
   );
 };
 
-export default CSRFToken;
+
+export function JSON_CSRF(){
+  //let csrftoken = getCookie('csrftoken');
+  return getCookie('csrftoken');
+  //return {'csrfmiddlewaretoken' : [csrftoken] };
+}

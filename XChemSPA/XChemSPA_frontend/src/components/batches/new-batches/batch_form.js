@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import {Show, Hide} from '../../Icons.js';
+import {CSRFToken} from '../../reusable_components/csrf.js';
 
 export class BatchForm extends Component {
 	constructor(props){
@@ -95,13 +96,18 @@ export class BatchForm extends Component {
 					<br />
 					<input type="radio" name="soak-type" id="multi" value="multi" onClick={() => this.pickMultiSoak()} />
 					<label htmlFor="multi">Multiple compounds per crystal (combi-soak/cocktail)</label>
-					<br />
-					<div className={this.state.combiUpload}>
-						<label htmlFor="combi-csv">Upload combination list: </label>
-						<input type="file" id="combi-csv" />
-					</div>
 				  </fieldset>
 				</form>
+				<div className={this.state.combiUpload}>
+					<form method="post" action="/imports/create-combinations/" target="_blank" encType="multipart/form-data">
+						<CSRFToken />
+						<input type="hidden" name="visit" value={this.props.visit} />
+						<label htmlFor="combi-csv">Upload combination list: </label>
+						<br />
+						<input type="file" id="combi-csv" name="data_file" />
+						<button type="submit">Submit</button>
+					</form>
+				</div>
 			</section>
         );
     }

@@ -1,5 +1,5 @@
 import React from 'react';
-import CSRFToken from '../reusable_components/csrf.js';
+import { CSRFToken } from '../reusable_components/csrf.js';
 import { validNaNCrystalScores } from '../reusable_components/constants.js'
 
 class Sidebar extends React.Component {

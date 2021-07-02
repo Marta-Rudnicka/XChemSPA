@@ -1,0 +1,8 @@
+- make sure a SPACompound has a Crystal (foreign Key)
+- visit in Crystal changed to Charfield
+- Add field visit to crystalplate
+- Alter field visit on compoundcombination
+- Alter field crystal_name on lab (add related related_name = "lab_data")
+- Add field visit to solventbatch
+- Alter field batch on lab (field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='crystals', to='API.batch')
+

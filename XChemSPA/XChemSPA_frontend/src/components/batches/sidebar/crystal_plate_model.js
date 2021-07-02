@@ -9,6 +9,8 @@ export class CrystalPlateModel extends Component {
 		this.state = {
 			lastColumn: 12,
 			lastClicked: 12,
+			lastUsed: 0,
+			usedColumns: null,
 			columns: null,
 			selected: 0,
 			highlighted: 0,
@@ -16,7 +18,8 @@ export class CrystalPlateModel extends Component {
 	}
 	
 	componentDidMount(){
-		this.setState({columns: this.divideCrystalsIntoColumns()}); 
+		const cols = this.divideCrystalsIntoColumns();
+		this.setState({columns: cols, usedColumns: cols }); 
 	}
 
 	componentDidUpdate(prevProps, prevState){
@@ -31,6 +34,7 @@ export class CrystalPlateModel extends Component {
 		const str1 = '[A-H]';
 		const str3 = '[acd]';
 		let cols = [];
+		let emptyCols = []
 
 		crystalPlateColumns.forEach(number => {
 			let newColumn = {id : number }
@@ -45,7 +49,12 @@ export class CrystalPlateModel extends Component {
 			newColumn.crystals = this.props.plate.items.filter(crystal => (crystal.well.match(pattern) !== null  && crystal.status !== "used"))
 			
 			newColumn.count = newColumn.crystals.length;
-			cols.push(newColumn);
+		//	if (newColumn.count > 0){
+				cols.push(newColumn);
+		/*	}
+			else {
+				emptyCols.push(newColumn);
+			}*/
 		});
 		return cols;
 	}
@@ -81,6 +90,7 @@ export class CrystalPlateModel extends Component {
 		let plate = this.props.plate;
 		plate.items = [];
 		let newSize = 0;
+		plate.includeItems(plate.excluded)
 		plate.excluded = 0;
 
 		this.state.columns.forEach(column => {
@@ -95,7 +105,7 @@ export class CrystalPlateModel extends Component {
 				column.crystals.forEach(crystal => {
 					crystal.status = "excluded";
 					plate.items.push(crystal);
-					plate.excluded ++;
+					plate.excludeItems(1);
 				});				
 			}
 		

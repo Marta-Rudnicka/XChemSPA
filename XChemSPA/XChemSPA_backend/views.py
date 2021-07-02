@@ -1,13 +1,28 @@
-from django.http.response import JsonResponse
-from tools.uploads_downloads import import_crystal_data_from_textrank
-from API.models import CrystalPlate
+from django.http.response import JsonResponse, HttpResponse
+from tools.uploads_downloads import import_crystal_data_from_textrank, create_validated_combinations
+from API.models import CrystalPlate, Batch, Crystal, SpaCompound, Lab
 from django.shortcuts import render
-from .helpers import get_proposal_from_visit, import_new_spa_compounds, overwrite_old_import, render_error_page, get_subset_dictionary
-from tools.validators import import_compounds_form_is_valid, import_crystals_form_is_valid
+from .helpers import (
+    get_proposal_from_visit, 
+    import_new_spa_compounds, 
+    overwrite_old_import, 
+    render_error_page, 
+    get_subset_dictionary,
+    create_batch,
+    create_lab_objects
+)
+from tools.validators import (
+    import_compounds_form_is_valid, 
+    import_crystals_form_is_valid, 
+    valid_batch_JSON_data,
+    combinations_form_is_valid,
+    valid_combinations_file,
+)
 from django.http import HttpResponseRedirect
 from django.core.files.storage import FileSystemStorage
 from API.models import Proposals
 from django.core.exceptions import ObjectDoesNotExist
+import json
 
 def import_compounds(request):
     if request.method == "POST":
@@ -35,6 +50,7 @@ def import_compounds(request):
 def import_new_crystals(request):
     if request.method == "POST":
         if import_crystals_form_is_valid(request.POST)["valid"]:
+            print(request.POST)
             name = request.POST.get("barcode", False)
             drop_volume = float(request.POST.get("drop_volume", False))
             plate_type = request.POST.get("plate_type", False)
@@ -47,7 +63,6 @@ def import_new_crystals(request):
             fs.delete(file_name)
     else:
         print(import_crystals_form_is_valid(request.POST)["error_log"])    
-    
     return HttpResponseRedirect('/crystals/')
 
 def verify_visit(request):
@@ -62,3 +77,63 @@ def verify_visit(request):
         except ObjectDoesNotExist:
             print('Bad visit')
             return HttpResponseRedirect('/visit/')
+
+def create_combinations(request):
+    if request.method == "POST":
+        error_log = []
+        if combinations_form_is_valid(request.POST, error_log):
+            print(request.POST)
+            print('valid form')
+        
+            fs = FileSystemStorage()
+            source = request.FILES["data_file"]
+            file_name = fs.save(source.name, source)
+            visit = request.POST.get("visit", False)
+
+            if valid_combinations_file(file_name, visit, error_log):
+                print('valid file')
+                create_validated_combinations(file_name, visit)
+                fs.delete(file_name)
+            else:
+                print('invalid file')
+                fs.delete(file_name)
+                return render_error_page(request, error_log)
+                #visit = request.POST.get("visit", False)
+                
+                #fs = FileSystemStorage()
+                #file_name = fs.save(source.name, source)
+                #create_combinations(file_name, visit)
+           
+            
+            return render_ok_page(request)
+        else:
+            print('invalid form')
+            return render_error_page(request, error_log)
+
+def create_batches(request):
+    
+    if request.method == "POST":
+        print('posted to create_batches')
+        batches_str = request.POST.get("batches", False)
+        visit = request.POST.get("visit", False) #TODO validate visit
+        print(batches_str)
+        error_log = []
+        if valid_batch_JSON_data(batches_str, error_log):
+            print('valid')
+            batches_list = json.loads(batches_str)
+            for b in batches_list:
+                batch = create_batch(b, visit)
+                create_lab_objects(batch, b, visit)
+            
+            return HttpResponse(status=201)
+        else:
+            print('invalid', error_log)
+            return render_error_page(request, error_log)
+
+
+
+def render_error_page(request, error_log):
+    return render(request, "XChemSPA_backend/errors.html", {'error_log': error_log})
+
+def render_ok_page(request):
+    return render(request, "XChemSPA_backend/ok.html")

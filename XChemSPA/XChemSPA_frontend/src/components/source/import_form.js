@@ -1,6 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-import CSRFToken from '../reusable_components/csrf.js';
+import { CSRFToken } from '../reusable_components/csrf.js';
 
 class SubsetSelect extends React.Component {
   constructor(props) {

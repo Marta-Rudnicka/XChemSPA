@@ -9,7 +9,7 @@ export class SelectCrystalPlate extends Component {
 		if (this.props.plates) {
 			options = this.props.plates.map(plate => {
 				try {
-					return <option key={plate.id} value={plate.id}>{this.getNameString(plate)}</option>;
+					return <option key={plate.id} value={plate.id}>{this.getNameString(plate)} ({plate.unmatchedItems}/{plate.size})</option>;
 				}
 				catch(e){
 					console.error(e)

@@ -13,7 +13,7 @@ class validImportModelTests(TestCase):
         self.assertTrue(v.valid_import_mode("add", []))
 
     def test1(self):
-            self.assertTrue(v.valid_import_mode("redo", [])
+            self.assertTrue(v.valid_import_mode("redo", []))
 
     def test1(self):
             self.assertTrue(v.valid_import_mode("double", []))

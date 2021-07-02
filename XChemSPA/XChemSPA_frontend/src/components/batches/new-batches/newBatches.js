@@ -2,8 +2,6 @@ import React, { Component } from 'react';
 
 export class NewBatches extends Component {
     render() {
-        //const libCol = "width: 40%"
-        //const numCol = "width: 20%"
         return (
             <React.Fragment>
 				<section id="batch-table">
@@ -35,8 +33,10 @@ export class NewBatches extends Component {
 				</section>
 				<section id="actions">
 					<h2>Actions </h2>
+
 					<button className="import-button">Merge selected</button>
 					<button className="import-button">Remove selected</button>
+					<button className="import-button" onClick={() => this.props.saveBatches()}>Save created batches</button>					
 				</section>
             </React.Fragment>
         );

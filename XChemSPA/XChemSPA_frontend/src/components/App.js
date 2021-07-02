@@ -73,14 +73,15 @@ class App extends Component {
 							{this.state.visit ? 
 							<Batches switchActive={this.switchActive}
 							proposal={this.state.proposal}
+							visit={this.state.visit}
 							/> : 
 							<Redirect to="/visit/" /> }
 						  </Route>
 						  <Route path="/soak/">
-							{this.state.visit ? <Soak switchActive={this.switchActive}/> : <Redirect to="/visit/" /> }
+							{this.state.visit ? <Soak switchActive={this.switchActive} proposal={this.state.proposal}/> : <Redirect to="/visit/" /> }
 						  </Route>
 						  <Route path="/cryo/">
-							{this.state.visit ? <Cryo switchActive={this.switchActive}/> : <Redirect to="/visit/" /> }
+							{this.state.visit ? <Cryo switchActive={this.switchActive} visit={this.state.visit}/> : <Redirect to="/visit/" /> }
 						  </Route>
 						  <Route path="/visit/">
 							<Visit switchActive={this.switchActive} setVisit={this.setVisit} setProposal={this.setProposal}/>

@@ -3,6 +3,7 @@ import {Show, Hide} from '../../Icons.js';
 import {batches} from '../fake_data.js';
 import BatchDetails from './batch_details.js';
 import ExistingBatchRow from './existing_batch_row.js';
+import ExistingBatchRowCocktail from './existing_batch_row_cocktail.js';
 
 export class ExistingBatches extends Component {
 	constructor(props){
@@ -25,12 +26,18 @@ export class ExistingBatches extends Component {
 	}
 	
     render() {
-		const batch_rows = batches.map((batch, index) => {
-			return (
-				<ExistingBatchRow key={index} batch={batch} />
-				);
-			}
-		);
+		let batch_rows = null;
+		if (this.props.batches) {
+			batch_rows = this.props.batches.map((batch, index) => {
+				if(batch.crystals[0].single_compound){
+					return <ExistingBatchRow key={index} batch={batch} />
+				}
+				else{
+					return <ExistingBatchRowCocktail key={index} batch={batch} />;
+				}
+			});
+		}
+
         return (
 				<section id="existing-batches" >
 					<table className="table" id="table">

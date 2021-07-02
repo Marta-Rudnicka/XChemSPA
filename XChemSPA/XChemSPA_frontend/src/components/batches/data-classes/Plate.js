@@ -28,12 +28,13 @@ export default class Plate {
 				this.name = plate.library_plate;
 				this.items = plate.compounds;
 				this.selected = plate.unused + plate.used;
+				this.excluded = 0;
 			}
 				
 			else {
 				this.name = plate.name;
 				this.items = plate.crystals;
-				this.excluded = plate.excluded;
+				this.excluded = 0;
 			}
 
 			this.used = plate.used;
@@ -67,19 +68,29 @@ export default class Plate {
 	}
 
 	useItems(number){
-		console.log('useItems ', number, 'in ', this.library_name, this.name, this.matchedItems, '/', this.size)
+		//console.log('useItems ', number, 'in ', this.library_name, this.name, this.matchedItems, '/', this.size)
 		this.unmatchedItems = this.unmatchedItems - number;
 		this.matchedItems = this.matchedItems + number;
 		this.checkPlateIntegrity();
 	}
 
 	unmatchItems(number){
-		console.log('unmatchItems ', number, 'in ', this.library_name, this.name, this.matchedItems, '/', this.size)
+		//console.log('unmatchItems ', number, 'in ', this.library_name, this.name, this.matchedItems, '/', this.size)
 		this.unmatchedItems = this.unmatchedItems + number;
 		this.matchedItems = this.matchedItems - number;
 		this.checkPlateIntegrity();
 	}
 	
+	excludeItems(number){
+		this.excluded = this.excluded + number;
+		this.unmatchedItems = this.unmatchedItems - number;
+	}
+
+	includeItems(number){
+		this.excluded = this.excluded - number;
+		this.unmatchedItems = this.unmatchedItems + number;
+	}
+
 	resize(newSize){
 		if (this.originalSize < newSize ) {
 			throw new RangeError("Trying to resize a crystallisation plate beyond its original size.");
@@ -103,7 +114,7 @@ export default class Plate {
 			throw new RangeError("Negative value(s) in a Plate object's properties; ", this);
 		}
 		
-		if (this.unmatchedItems + this.matchedItems !== this.size) {
+		if (this.unmatchedItems + this.matchedItems + this.excluded !== this.size) {
 			throw new RangeError('Items in a Plate object do not add up: ', this);
 		}
 	}

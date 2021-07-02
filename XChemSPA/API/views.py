@@ -6,8 +6,28 @@ from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import generics
 from rest_framework.permissions import AllowAny
-from .serializers import CrystalSerializer, ProposalDetailSerializer, LibrarySerializer, SpaCompoundSerializer, CrystalPlateSerializer
-from .models import CrystalPlate, Proposals, Library, SpaCompound, Crystal
+from .serializers import (
+	BatchSerializer,
+	CompoundCombinationSerializer, 
+	CrystalSerializer, 
+	LabSerializer, 
+	ProposalDetailSerializer, 
+	LibrarySerializer, 
+	SpaCompoundSerializer, 
+	CrystalPlateSerializer,
+	LabSerializer,
+	BatchSerializer,
+	)
+from .models import (
+	CompoundCombination,
+	CrystalPlate, 
+	Proposals, 
+	Library, 
+	SpaCompound, 
+	Crystal, 
+	Lab, 
+	Batch
+	)
 
 class ProposalsDetail(generics.RetrieveUpdateAPIView):
 	permission_classes = [AllowAny]
@@ -54,19 +74,38 @@ class CrystalDelete(generics.DestroyAPIView):
 	queryset = Crystal.objects.filter(lab_data = None)	
 	permission_classes = [AllowAny]
 	serializer_class = CrystalSerializer
-'''
-class CrystalDelete(View):
-	def get(self, request, *args, **kwargs):
-		pk = self.kwargs['pk']
-		crystal =  Crystal.objects.get(pk=pk)
-		print(crystal.id)	
-		print(crystal.well)
-		print(crystal.crystal_plate.name)
-		try:
-			crystal.lab_data
-			print('will not be removed')
-		except ObjectDoesNotExist:
-			print('can be removed')
-		
-		return HttpResponse('x')
-'''
+
+class LabDetail(generics.RetrieveAPIView):
+	queryset = Lab.objects.all()
+	serializer_class = LabSerializer
+	permission_classes = [AllowAny]
+
+
+class LabsByProposal(generics.ListAPIView):
+	def get_queryset(self):
+		proposal = self.kwargs['proposal']
+		return Lab.objects.filter(visit__contains=proposal)
+	
+	permission_classes = [AllowAny]
+	serializer_class = LabSerializer
+
+class BatchDetail(generics.RetrieveAPIView):
+	queryset = Batch.objects.all()
+	serializer_class = BatchSerializer
+	permission_classes = [AllowAny]
+
+class BatchesByProposal(generics.ListAPIView):
+	def get_queryset(self):
+		proposal = self.kwargs['proposal']
+		return Batch.objects.filter(visit__contains=proposal)
+	
+	permission_classes = [AllowAny]
+	serializer_class = BatchSerializer
+
+class CompoundCombinations(generics.ListAPIView):
+	def get_queryset(self):
+		visit = self.kwargs['visit']
+		return CompoundCombination.objects.filter(visit=visit)
+	
+	permission_classes = [AllowAny]
+	serializer_class = CompoundCombinationSerializer

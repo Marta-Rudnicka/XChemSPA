@@ -17,14 +17,6 @@ export class Match extends Component {
     }
   }
 
-  /*
-  componentDidUpdate(prevProps, prevState){
-    const s = this.state;
-        if(prevState !== s && s.selectedLibPlate === null && s.selectedCrystalPlate === null ){
-        	this.props.deleteEmptyMatch();
-        }
-    }
-  */
   resetMatch(){
     const match = this.props.match;
     console.log('running reset match ', match.size)

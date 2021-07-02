@@ -1,7 +1,18 @@
-from API.models import Proposals, LibraryPlate, LibrarySubset, SpaCompound
+from API.models import (
+    CompoundCombination,
+    Proposals,
+    LibraryPlate, 
+    LibrarySubset, 
+    SpaCompound, 
+    Lab, 
+    Batch,
+    Crystal,
+    CrystalPlate,
+    )
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 import re
+import json
 
 def render_error_page(request, error_log):
     '''error_log - list of HTML strings to display'''
@@ -102,3 +113,40 @@ def get_subset_dictionary(post_data):
             dict[int(subset_id)] = plate_ids
     
     return dict
+
+''' MAKING BATCHES AND LINKING CRYSTALS TO COMPOUNDS '''
+
+def create_batch(dict, visit):
+
+    number = int(dict["batchNumber"])
+    crystal_plate_id = int(dict["crystalPlate"])
+    cp = CrystalPlate.objects.get(pk=crystal_plate_id)
+    print('New batch. number: ', number, ", crystal_plate: ", cp)
+    newBatch = Batch.objects.create(number = number, crystal_plate = cp, visit=visit)
+    return newBatch
+
+def create_lab_objects(batch_object, batch_dictionary, visit):
+    i = 0
+    for c in batch_dictionary["crystals"]:
+        crystal = Crystal.objects.get(pk=c)
+        compound_id = batch_dictionary["compounds"][i]
+        if not batch_dictionary["cocktail"]:
+            compound = SpaCompound.objects.get(pk=compound_id)
+            print('Lab. crystal_name: ', crystal.id, ', single_compound: ', compound.code, 'visit: ', visit, 'batch: none yet')
+        
+            Lab.objects.create(
+                crystal_name = crystal, 
+                single_compound = compound, 
+                batch = batch_object,
+                visit = visit
+                )
+        else:
+            compound = CompoundCombination.objects.get(pk=compound_id)
+            Lab.objects.create(
+                crystal_name = crystal, 
+                compound_combination = compound, 
+                batch = batch_object,
+                visit = visit
+                )
+
+        i += 1
