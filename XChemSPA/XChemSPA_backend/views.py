@@ -18,10 +18,12 @@ from tools.validators import (
     combinations_form_is_valid,
     valid_combinations_file,
 )
+from tools.conversions import create_well_dict
 from django.http import HttpResponseRedirect
 from django.core.files.storage import FileSystemStorage
 from API.models import Proposals
 from django.core.exceptions import ObjectDoesNotExist
+from datetime import date
 import json
 
 def import_compounds(request):
@@ -130,7 +132,86 @@ def create_batches(request):
             print('invalid', error_log)
             return render_error_page(request, error_log)
 
+def serve_soak_echo_file(request, pk, soak):
+    dict = create_well_dict()
+    batch = Batch.objects.get(pk=pk)
+    if "3drop" in batch.crystal_plate.plate_type:
+        platetype = "-3drop"
+    else:
+        platetype = "-2drop"
 
+    plate_batch = "Batch-" + str(batch.number) + '_???_' + str(date.today()) + '_' + batch.crystal_plate.name + platetype
+
+    header = "PlateBatch, Source well, Destination well, Transfer Volume, Destination Well X Offset, Destination Well Y Offset \n"
+    print(header)
+    file_path = 'soak.csv'
+
+    with open(file_path, 'r+') as f:
+        f.truncate(0)
+        f.write(header)
+        
+        for c in batch.crystals.all():
+
+            dest_well = dict[c.crystal_name.well]
+            if soak == 0:
+                source_well = c.single_compound.well
+            else:
+                source_well = c.compound_combination.compounds.all()[soak-1].well
+            
+            strings = [plate_batch, source_well , dest_well, str(batch.soak_vol), str(c.crystal_name.echo_x), str(c.crystal_name.echo_y), "\n"]
+
+            line = ','.join(strings)
+            f.write(line)
+        
+        f.close()
+        with open(file_path, 'r+') as f:
+            filename = plate_batch + "_soak"
+            if soak > 0:
+                filename = filename + "soak-" + str(soak)
+            filename = filename + '.csv'
+            response = HttpResponse(f, content_type='text/csv')
+            response['Content-Disposition'] = "attachment; filename=%s" % filename
+	
+    return response
+
+
+def serve_cryo_echo_file(request, pk, soak):
+    dict = create_well_dict()
+    batch = Batch.objects.get(pk=pk)
+    if "3drop" in batch.crystal_plate.plate_type:
+        platetype = "-3drop"
+    else:
+        platetype = "-2drop"
+
+    plate_batch = "Batch-" + str(batch.number) + '_???_' + str(date.today()) + '_' + batch.crystal_plate.name + platetype
+
+    header = "PlateBatch, Source well, Destination well, Transfer Volume, Destination Well X Offset, Destination Well Y Offset \n"
+    print(header)
+    file_path = 'cryo.csv'
+
+    with open(file_path, 'r+') as f:
+        f.truncate(0)
+        f.write(header)
+        
+        for c in batch.crystals.all():
+
+            dest_well = dict[c.crystal_name.well]
+            source_well = batch.cryo_location           
+            strings = [plate_batch, source_well , dest_well, str(batch.cryo_transfer_vol), str(c.crystal_name.echo_x), str(c.crystal_name.echo_y), "\n"]
+
+            line = ','.join(strings)
+            f.write(line)
+        
+        f.close()
+        with open(file_path, 'r+') as f:
+            filename = plate_batch + '_cryo' 
+            if soak > 0:
+                filename = filename + "soak-" + str(soak)
+            filename = filename + '.csv'
+            response = HttpResponse(f, content_type='text/csv')
+            response['Content-Disposition'] = "attachment; filename=%s" % filename
+	
+    return response
 
 def render_error_page(request, error_log):
     return render(request, "XChemSPA_backend/errors.html", {'error_log': error_log})

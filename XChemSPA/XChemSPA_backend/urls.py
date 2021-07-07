@@ -14,4 +14,6 @@ urlpatterns = [
     path("verify-visit/", views.verify_visit, name="verify-visit"),
     path("create-batches/", views.create_batches, name="create-batches"),
     path("imports/create-combinations/", views.create_combinations, name="create_combinations"),
+    path("exports/echo-soak/<int:pk>/<int:soak>/", views.serve_soak_echo_file, name="echo_soak"),
+    path("exports/echo-cryo/<int:pk>/<int:soak>/", views.serve_cryo_echo_file, name="echo_cryo")
 ]

@@ -81,7 +81,7 @@ class App extends Component {
 							{this.state.visit ? <Soak switchActive={this.switchActive} proposal={this.state.proposal}/> : <Redirect to="/visit/" /> }
 						  </Route>
 						  <Route path="/cryo/">
-							{this.state.visit ? <Cryo switchActive={this.switchActive} visit={this.state.visit}/> : <Redirect to="/visit/" /> }
+							{this.state.visit ? <Cryo switchActive={this.switchActive} proposal={this.state.proposal}/> : <Redirect to="/visit/" /> }
 						  </Route>
 						  <Route path="/visit/">
 							<Visit switchActive={this.switchActive} setVisit={this.setVisit} setProposal={this.setProposal}/>

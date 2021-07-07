@@ -109,3 +109,12 @@ class CompoundCombinations(generics.ListAPIView):
 	
 	permission_classes = [AllowAny]
 	serializer_class = CompoundCombinationSerializer
+
+
+class BatchUpdate(generics.RetrieveUpdateAPIView):
+	queryset = Batch.objects.all()	
+	lookup_field = "pk"
+	authentication_classes = []
+	permission_classes = [AllowAny]
+	serializer_class = BatchSerializer
+

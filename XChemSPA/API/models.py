@@ -250,7 +250,7 @@ class SolventBatch(models.Model):
     cryo_status = models.CharField(max_length=64, blank=True, null=True)
     
     def batch_name(self):
-        return 'Batch-' + self.number + '_' + self.crystal_plate.name #needs verification
+        return 'Batch-' + str(self.number) + '_' + self.crystal_plate.name #needs verification
 
 #new class (SPA experimental data)	
 class Batch(SolventBatch, SoakAndCryoValues):

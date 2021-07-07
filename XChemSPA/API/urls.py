@@ -12,5 +12,6 @@ urlpatterns = [
 	path("labs/<str:proposal>/", views.LabsByProposal.as_view(), name="labs"),
 	path("batch_detail/<int:pk>/", views.BatchDetail.as_view(), name="batch_detail"),
 	path("batches/<str:proposal>/", views.BatchesByProposal.as_view(), name="batches"),
-	path("combinations/<str:visit>/", views.CompoundCombinations.as_view(), name="combinations")
+	path("combinations/<str:visit>/", views.CompoundCombinations.as_view(), name="combinations"),
+	path("update_batch/<int:pk>/", views.BatchUpdate.as_view(), name="update_batch"),
 ]

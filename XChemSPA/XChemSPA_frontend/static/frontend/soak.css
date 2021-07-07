@@ -17,6 +17,11 @@ div#soak{
 
 #soak form {
 	border: solid black 1px;
+	padding: 5px;
+}
+
+#soak form input[type=number]{
+	width: 4em;
 }
 
 .extra-info {
@@ -30,4 +35,9 @@ div#soak{
 
 .excluded {
 	opacity: 0.4;
+}
+
+.one-line-form-input{
+	display: grid;
+	grid-template-columns: auto auto;
 }

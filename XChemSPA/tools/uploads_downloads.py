@@ -17,15 +17,6 @@ def import_crystal_data_from_textrank(file_name, crystal_plate, visit):
 
             for row in crystal_reader:
                 if row[1]: 
-                    '''
-                    print("------------MAKING CRYSTAL----------")
-                    print("plate: ", crystal_plate.name)
-                    print("well = ", row[0])
-                    print("echo_x =", row[1])
-                    print("echo_y =", row[2])
-                    print("score =", row[3])
-                    print("visit =", visit)
-                    '''
                     Crystal.objects.create(
                         crystal_plate = crystal_plate,
                         well = row[0],

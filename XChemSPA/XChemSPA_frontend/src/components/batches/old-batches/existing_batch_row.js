@@ -13,7 +13,6 @@ export class ExistingBatchRow extends Component {
 			hideClass: "hidden",
 			detailsBySoak: false,
 		}
-	
 	}
 	
 	showDetails(){

@@ -1,5 +1,6 @@
 export function deepCopyObjectArray(array){
 	//this sucks; needs to be changed
+	//Only for JSON data -- DO NOT USE for objects with any methods
 	let output = [];
 	array.forEach(object => {
 		const objectDeepCopy = JSON.parse(JSON.stringify(object));
@@ -14,8 +15,10 @@ export function removeFromArray(array, elements_to_remove){
 	 */
 	const arrayCopy = array.slice(0, array.length);
 	elements_to_remove.forEach(element => {
-		const found = arrayCopy.find(item => item === element);
-		arrayCopy.splice(arrayCopy.indexOf(found), 1);
+		if (arrayCopy.includes(element)){
+			const found = arrayCopy.find(item => item === element);
+			arrayCopy.splice(arrayCopy.indexOf(found), 1);
+		}
 	});
 	return arrayCopy;
 }

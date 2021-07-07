@@ -1,66 +1,6 @@
-import React, { Component } from 'react';
 import ExistingBatchRow from './existing_batch_row.js';
-import {Show, Hide} from '../../Icons.js';
-import BatchDetails from './batch_details.js';
-import BatchDetailsBySoak from './batch_details_by_soak.js';
-import BatchDetailsCocktail from './batch_details_cocktail.js';
+import { basicCocktailMixin } from '../../reusable_components/basic_cocktail_mixin.js';
 
-export class ExistingBatchRowCocktail extends ExistingBatchRow {
-
-    getLibraryCell(){
-		return <td>{this.getLibrariesInCombinations()['libraries']}</td>;
-	}
-	
-	getPlateCell(){
-		return <td>{this.getLibrariesInCombinations()['plates']}</td>;
-	}
-
-	getChangeView(){
-		return (
-            <div>
-                <input type="checkbox" onChange={event => this.handleCheckbox(event)} className={this.state.hideClass} />
-                <label className={this.state.hideClass}>view by soak</label>
-            </div> 
-        );
-	}
-
-    getBatchDetails(){
-        if (this.state.detailsBySoak)
-            return <BatchDetailsBySoak crystals={this.props.batch.crystals} />
-        else {
-            return <BatchDetailsCocktail crystals={this.props.batch.crystals} />
-        }
-    }
-
-	handleCheckbox(event){
-		if (event.target.checked){
-			this.setState({detailsBySoak: true});
-		}
-		else {
-			this.setState({detailsBySoak: false});
-		}
-	}
-
-	getLibrariesInCombinations(){
-		let libraries = [];
-		let plates = [];
-
-		this.props.batch.crystals.forEach(crystal => {
-			crystal.compound_combination.compounds.forEach(compound=>{
-				if (!libraries.includes(compound.library_name)){
-					libraries.push(compound.library_name)
-				}
-				if (!plates.includes(compound.library_plate)){
-					plates.push(compound.library_plate)
-				}
-			})
-		})
-		let libraryStr = "";
-		let plateStr = "";
-		libraries.forEach(lib => libraryStr = libraryStr + lib + ', ');
-		plates.forEach(plate => plateStr = plateStr + plate + ', ');
-		return {libraries: libraryStr, plates: plateStr};
-	}    
-}
+export class ExistingBatchRowCocktail extends basicCocktailMixin(ExistingBatchRow) {}
 
 export default ExistingBatchRowCocktail;
