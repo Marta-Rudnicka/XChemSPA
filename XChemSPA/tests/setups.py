@@ -154,12 +154,11 @@ def set_up_crystals(data, crystal_plate_data):
         c = Crystal.objects.create(
             crystal_plate=plates[0], 
             visit=t[0], 
-            well=[1], 
+            well=t[1], 
             echo_x=t[2], 
             echo_y=t[3], 
             score=t[4],
-            crystal_name=t[5]
-            
+            crystal_name=t[5]            
             )
         crystals.append(c)
     

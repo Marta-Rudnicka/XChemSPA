@@ -1,9 +1,11 @@
+from datetime import datetime
 from API.models import CompoundCombination, CrystalPlate, Proposals, LibraryPlate, LibrarySubset, SpaCompound, Crystal
 from django.core.exceptions import ObjectDoesNotExist
 import re
 import csv
 import json
 from .string_parsers import get_proposal_from_visit
+from .conversions import js_utcstr_to_python_date, shifter_2_datetime, shifter_2_drop_name, shifter_2_timedelta
 
 def update_error_log(error_log, err_string):
     try:
@@ -159,7 +161,7 @@ def import_crystals_form_is_valid(post_data):
                 update_error_log[error_log, "Invalid drop volume (not a number)"]
                 valid = False
         elif key=='plate_type':
-            if not value in ['SwissCI-3drop', 'SwissCI-2drop', 'MRC-2drop', 'MiTInSitu']:
+            if not valid_plate_type(value):
                 update_error_log[error_log, "Invalid plate type value"]
                 valid = False
     
@@ -249,6 +251,12 @@ def valid_score(string):
         return True
     except (TypeError, AssertionError):
         return False
+
+def valid_plate_type(string):
+    if string in ['SwissCI-3drop', 'SwissCI-2drop', 'MRC-2drop', 'MiTInSitu']:
+        return True
+    return False
+
 
 #BATCH DATA
 def valid_JSON(str, error_log):
@@ -541,3 +549,110 @@ def get_index_from_headers(header):
         dict["related_crystal"] = None
 
     return dict
+
+#TIMESTAMPS
+
+def valid_utcstr_date(date_str, error_log):
+    try:
+        js_utcstr_to_python_date(date_str)
+        return True
+    except (TypeError, ValueError):
+        update_error_log(error_log, "Application error: invalid timestamp.")
+        return False
+
+def batch_eligible_for_soak_time(batch, error_log):
+    if (batch.soak_timestamp and batch.soak_status == "soaking" and batch.expr_conc):
+        return True
+    else:
+        update_error_log(error_log, "Application error: missing batch data!")
+        return False
+
+#SHIFTER INPUT
+
+def shifter_input_is_valid(file_name, error_log, batch):
+    if not is_csv(file_name, error_log):
+        return False
+    
+    try:
+        with open(file_name, newline='') as csvfile:
+            dialect = csv.Sniffer().sniff(csvfile.read(1024))
+            dialect.delimiter = ','
+            csvfile.seek(0)
+            crystal_reader = csv.reader(csvfile, dialect)
+            for row in crystal_reader:
+                try:
+                    assert(valid_plate_type(row[0]))
+                    assert(valid_well_1(row[3]))
+                    assert(valid_well_2(row[4]))
+                    assert(valid_well_3(row[5]))
+                    assert(valid_shifter_timestamp(row[8]))
+                    assert(valid_shifter_timestamp(row[9]))
+                    assert(valid_shifter_time_delta(row[10]))
+                    assert(valid_puck_position(row[12]))
+                    if not correct_crystal_reference(row, batch):
+                        update_error_log(error_log, "The file seems to refer to a different batch than it is submitted for.")
+                        return False    
+
+                except (AssertionError, IndexError):
+                    update_error_log(error_log, "Unexpected data found inside the file. Please make sure you are uploading the correct file.")
+                    return False
+		
+    except FileNotFoundError:
+        msg = "FILE ERROR: File '" + file_name + "' does not exist!"
+        update_error_log(msg, error_log)
+        return False
+	
+    return True
+
+#the well name in Shifter output is divided into three columns, e.g. B03c -> B | 3 | c
+#therefore the are three columns to validate
+def valid_well_1(str):
+    if re.fullmatch('[A-H]', str):
+        return True
+    return False
+
+def valid_well_2(str):
+    try:
+        if int(str) in range(1,13) and str[0] != '0':
+            return True
+        return False
+    except ValueError:
+        return False
+
+def valid_well_3(str):
+    if str in ['a', 'c', 'd']:
+        return True
+    return False
+
+def valid_shifter_timestamp(str):
+    try:
+        shifter_2_datetime(str)
+        return True
+    except (ValueError, TypeError):
+        return False
+
+def valid_shifter_time_delta(str):
+    try:
+        shifter_2_timedelta(str)
+        return True
+    except (ValueError, TypeError):
+        return False
+
+def valid_puck_position(str):
+    try:
+        if int(str) in range(1,17):
+            return True
+        return False
+    except ValueError:
+        return False
+
+def correct_crystal_reference(row, batch):
+    '''Checks if a batch names are correct, and if a crystal in such a batch exists;
+    assumes that the data is in the correct format'''
+    if row[1] != batch.batch_name():
+        return False
+    try:
+        batch.crystals.get(crystal_name__well = shifter_2_drop_name(row))
+        return True
+    except ObjectDoesNotExist:
+        return False

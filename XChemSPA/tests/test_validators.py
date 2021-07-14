@@ -1,8 +1,9 @@
 from logging import error
-from API.models import Library, LibraryPlate, CrystalPlate, SpaCompound, Crystal, Lab
+from API.models import Library, LibraryPlate, CrystalPlate, SpaCompound, Crystal, Lab, Batch
 from setups import set_up_crystal_plates, set_up_library_plates
 from API.models import Proposals, LibrarySubset
 from tools.validators import (
+        correct_crystal_reference,
         get_index_from_headers,
         matching_library,
         extract_subset_id,
@@ -15,6 +16,12 @@ from tools.validators import (
         valid_import_library_key,
         subset_in_proposal,
         get_object,
+        valid_puck_position,
+        valid_shifter_time_delta,
+        valid_shifter_timestamp,
+        valid_well_1,
+        valid_well_2,
+        valid_well_3,
         valid_well_name,
         unique_well_name,
         valid_coordinates,
@@ -26,6 +33,7 @@ from tools.validators import (
         valid_related_crystal,
         valid_combinations_headers,
         valid_compound_reference,
+        valid_utcstr_date,
 )
 
 from django.test import TestCase
@@ -638,3 +646,110 @@ class ValidCombinationDataDataTest(TestCase):
         self.assertFalse(valid_compound_reference(invalid_line4, dic1, "visit-1", error_log, 4))
         self.assertFalse(valid_compound_reference(invalid_line5, dic1, "visit-1", error_log, 5))
         self.assertFalse(valid_compound_reference(invalid_line6, dic1, "visit-1", error_log, 6))
+
+class ValidUTCStrDateTest(TestCase):
+    def test(self):
+        error_log = []
+        self.assertTrue(valid_utcstr_date('Mon, 12 Jul 2021 19:08:13 GMT', error_log))
+        self.assertTrue(valid_utcstr_date('Fri, 12 Feb 2021 19:08:13 GMT', error_log))
+        self.assertFalse(valid_utcstr_date('Mon, 30 Feb 2021 19:08:13 ACT', error_log))
+        self.assertFalse(valid_utcstr_date('Mon, 12 Jul 2021 19:68:13 GMT', error_log))
+        self.assertFalse(valid_utcstr_date('Mon, 12 Jul 2021 50:08:13 GMT', error_log))
+        self.assertFalse(valid_utcstr_date('Mon, 12 X 2021 19:08:13 GMT', error_log))
+        self.assertFalse(valid_utcstr_date('string', error_log))
+        errs = [
+            "Application error: invalid timestamp.",
+            "Application error: invalid timestamp.",
+            "Application error: invalid timestamp.",
+            "Application error: invalid timestamp.",
+            "Application error: invalid timestamp."
+        ]
+        self.assertEqual(error_log, errs)
+
+class ShifterInputIsValidTest(TestCase):
+    '''tests helpers of shifter_input_is_valid()'''
+    def setUp(self):
+        set_up_labs(lab_data, batch_data, crystal_plate_data, crystal_data, spa_compound_data)
+
+    def test_valid_well_1(self):
+        self.assertTrue(valid_well_1('A'))
+        self.assertTrue(valid_well_1('H'))
+        self.assertFalse(valid_well_1('I'))
+        self.assertFalse(valid_well_1('1'))
+        self.assertFalse(valid_well_1('AB'))
+        self.assertFalse(valid_well_1(''))
+
+    def test_valid_well_2(self):
+        self.assertTrue(valid_well_2('1'))
+        self.assertTrue(valid_well_2('12'))
+        self.assertFalse(valid_well_2('0'))
+        self.assertFalse(valid_well_2('13'))
+        self.assertFalse(valid_well_2('AB'))
+        self.assertFalse(valid_well_2(''))
+        self.assertFalse(valid_well_2('06'))
+    
+    def test_valid_well_3(self):
+        self.assertTrue(valid_well_3('a'))
+        self.assertTrue(valid_well_3('d'))
+        self.assertFalse(valid_well_3('b'))
+        self.assertFalse(valid_well_3('aa'))
+        self.assertFalse(valid_well_3('15'))
+        self.assertFalse(valid_well_3(''))
+        self.assertFalse(valid_well_3('06'))
+    
+    def test_valid_shifter_timestamp(self):
+        self.assertTrue(valid_shifter_timestamp('2020-09-28 16:08:05.4'))
+        self.assertTrue(valid_shifter_timestamp('2022-10-14 09:08:05.4'))
+        self.assertFalse(valid_shifter_timestamp('2020-09-31 16:08:05.4'))
+        self.assertFalse(valid_shifter_timestamp('2020-09-32 16:08:05.4'))
+        self.assertFalse(valid_shifter_timestamp('2020-02-30 16:08:05.4'))
+        self.assertFalse(valid_shifter_timestamp('2020-09-31 25:08:05.4'))
+        self.assertFalse(valid_shifter_timestamp('2020-09-31 16:62:05.4'))
+        self.assertFalse(valid_shifter_timestamp('2020-09-31 16:08:74.4'))
+        self.assertFalse(valid_shifter_timestamp('string'))
+        self.assertFalse(valid_shifter_timestamp(12))
+    
+    def test_valid_shifter_time_delta(self):
+        self.assertTrue(valid_shifter_time_delta('00:00:15.9'))
+        self.assertTrue(valid_shifter_time_delta('00:05:15.9'))
+        self.assertTrue(valid_shifter_time_delta('03:18:15.9'))
+        self.assertFalse(valid_shifter_time_delta('00:74:15.9'))
+        self.assertFalse(valid_shifter_time_delta(3))
+        self.assertFalse(valid_shifter_time_delta(178))
+        self.assertFalse(valid_shifter_time_delta('00:00:68.9'))
+        self.assertFalse(valid_shifter_time_delta(''))
+        
+        
+    def test_valid_puck_position(self):
+        self.assertTrue(valid_puck_position('1'))
+        self.assertTrue(valid_puck_position('16'))
+        self.assertTrue(valid_puck_position(1))
+        self.assertTrue(valid_puck_position(16))
+        self.assertFalse(valid_puck_position('0'))
+        self.assertFalse(valid_puck_position('17'))
+        self.assertFalse(valid_puck_position('str'))
+        self.assertFalse(valid_puck_position(''))
+
+    def test_correct_crystal_reference(self):
+        batch = Batch.objects.get(number=1)
+        
+        row1 = ("0", "Batch-1_barcode1", "AM", "A", "1", "a")
+        row2 = ("0", "Batch-1_barcode1", "AM", "A", "1", "d")
+        row3 = ("0", "Batch-1_barcode1", "AM", "A", "3", "a")
+        
+        row4 = ("0", "Batch-1_barcode1", "AM", "B", "10", "c")
+        row5 = ("0", "Batch-1_barcode7", "AM", "A", "1", "a")
+        row6 = ("0", "Batch-1_barcode1", "AM", "H", "1", "d")
+        row7 = ("0", "Batch-1_barcode1", "AM", "A", "8", "a")
+        row8 = ("0", "Batch-1_barcode1", "AM", "B", "10", "f")
+
+
+        self.assertTrue(correct_crystal_reference(row1, batch))
+        self.assertTrue(correct_crystal_reference(row2, batch))
+        self.assertTrue(correct_crystal_reference(row3, batch))
+       
+        self.assertFalse(correct_crystal_reference(row4, batch))
+        self.assertFalse(correct_crystal_reference(row5, batch))
+        self.assertFalse(correct_crystal_reference(row6, batch))
+        self.assertFalse(correct_crystal_reference(row7, batch))
+        self.assertFalse(correct_crystal_reference(row8, batch))

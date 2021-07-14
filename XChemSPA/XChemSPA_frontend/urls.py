@@ -8,5 +8,6 @@ urlpatterns = [
     path('batches/', views.index),
     path('soak/', views.index),
     path('cryo/', views.index),
-    path('visit/', views.index)
+    path('visit/', views.index),
+    path('harvesting/', views.index)
 ]
