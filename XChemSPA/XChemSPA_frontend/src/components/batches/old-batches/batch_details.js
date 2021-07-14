@@ -12,6 +12,27 @@ export class BatchDetails extends Component {
         return null; //overwritten in BatchDetailsCocktail
     }
 
+	getMainHeaders(){
+        return (
+			<React.Fragment>
+				<th>Drop</th>
+				<th>Source Well</th>
+				<th>Code</th>
+				<th>Smiles</th>
+			</React.Fragment>
+		);
+    }
+
+	headers(){
+		const main = this.getMainHeaders();
+		const extra = this.getExtraHeaders();
+		return (
+			<React.Fragment>
+				{main}
+				{extra}
+			</React.Fragment>
+		);
+	}
 	getCrystalRows(){
 		const rows = this.props.crystals.map((item, index) => {
 			return (
@@ -33,17 +54,13 @@ export class BatchDetails extends Component {
 			crystal_rows = this.getCrystalRows();
 		}
 
-		const extraHeaders = this.getExtraHeaders();
+		const headers = this.headers();
 
 		return(
 			<table className="batch-details">
 				<thead>
 					<tr>
-						<th>Drop</th>
-						<th>Source Well</th>
-						<th>Code</th>
-						<th>Smiles</th>
-						{extraHeaders}
+						{headers}
 					</tr>
 				</thead>
 				<tbody>

@@ -101,12 +101,15 @@ class BatchSerializer(serializers.ModelSerializer):
 			'soak_status', 
 			'soak_vol',
 			'expr_conc',
-			'soak_time', 
+			'soak_timestamp', 
+			'cryo_timestamp',
+			'soaking_time',
 			'cryo_status',
 			'cryo_frac',
 			'cryo_stock_frac',
 			'cryo_location',
 			'cryo_transfer_vol',
+			'batch_name',
 			'crystals',
 		]
 		depth = 3

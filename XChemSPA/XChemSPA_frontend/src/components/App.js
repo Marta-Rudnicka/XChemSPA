@@ -9,6 +9,7 @@ import Batches from './batches/Batches.js';
 import Soak from './soak/Soak.js';
 import Cryo from './cryo/Cryo.js';
 import Visit from './visit/Visit.js';
+import Harvesting from './harvesting/Harvesting';
 
 
 import {
@@ -82,6 +83,9 @@ class App extends Component {
 						  </Route>
 						  <Route path="/cryo/">
 							{this.state.visit ? <Cryo switchActive={this.switchActive} proposal={this.state.proposal}/> : <Redirect to="/visit/" /> }
+						  </Route>
+						  <Route path="/harvesting/">
+							{this.state.visit ? <Harvesting switchActive={this.switchActive} proposal={this.state.proposal}/> : <Redirect to="/visit/" /> }
 						  </Route>
 						  <Route path="/visit/">
 							<Visit switchActive={this.switchActive} setVisit={this.setVisit} setProposal={this.setProposal}/>

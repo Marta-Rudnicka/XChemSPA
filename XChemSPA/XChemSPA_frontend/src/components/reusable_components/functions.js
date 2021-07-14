@@ -67,5 +67,14 @@ export function groupCompoundsByPlate(compounds_array){
   }
 
 export function addStatusToItems(collection, key){
-	console.log('plateholder');
+	console.log('placeholder');
+}
+
+export function leadingZero(string){
+	if (string.length === 1){
+		return '0' + string;
+	}
+	else {
+		return string;
+	}
 }

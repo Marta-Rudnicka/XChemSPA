@@ -30,6 +30,7 @@ export class Soak extends Component {
 			stockConc: null,
 			solvConc: null,
 			batches: [],
+			initialBatchStatus: "Waiting for soak parameters",
 		}
 	
 	}
@@ -54,7 +55,12 @@ export class Soak extends Component {
 	addInitialBatchData(batches){
 		batches.forEach(batch => {
 			batch.included = true;
-			batch.status = "Waiting for soak parameters"
+			if (batch.soak_status){
+				batch.status = batch.soak_status;
+			}
+			else{
+				batch.status = this.state.initialBatchStatus; 
+			}
 		})
 		return batches;
 	}
@@ -87,7 +93,7 @@ export class Soak extends Component {
 			batch.status = "Ready to generate input file for Echo."
 		}
 		else{
-			batch.status = "Waiting for soak parameters"
+			batch.status = this.state.initialBatchStatus;
 		}
 	}
 
@@ -158,7 +164,7 @@ export class Soak extends Component {
 		batch.stock_conc = null;
 		batch.soak_vol = null;
 		batch.expr_conc = null;
-		batch.status = "Waiting for soak parameters"
+		batch.status = this.state.initialBatchStatus;
 	}
 
 	includeBatch(batch){
@@ -193,7 +199,7 @@ export class Soak extends Component {
 		//check if it makes sense to generate the files:
 		this.state.batches.forEach(batch => {
 			if (batch.included){
-				if (batch.status === "Waiting for soak parameters"){
+				if (batch.status === this.state.initialBatchStatus){
 					alert("Compound stock concentration and desired solvent concentration need to be set before generating files!");
 					return;
 				}
@@ -211,6 +217,7 @@ export class Soak extends Component {
 				data.append("solv_frac", batch.solv_frac);
 				data.append("stock_conc", batch.stock_conc);
 				data.append("expr_conc", batch.expr_conc);
+				data.append("soak_status", "file")
 
 				const url = '/api/update_batch/' + batch.id + '/';
 				axios.put(url, data);

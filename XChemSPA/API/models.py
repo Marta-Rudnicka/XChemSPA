@@ -246,11 +246,14 @@ class SolventBatch(models.Model):
     number = models.IntegerField(default=0)
     visit = models.CharField(max_length=64, blank=True, null=True)
     soak_status = models.CharField(max_length=64, blank=True, null=True)
-    soak_time = models.IntegerField(blank=True, null=True)
+    soak_timestamp = models.DateTimeField(blank=True, null=True)
+    cryo_timestamp = models.DateTimeField(blank=True, null=True)
+    soaking_time = models.DurationField(blank=True, null=True)
     cryo_status = models.CharField(max_length=64, blank=True, null=True)
     
     def batch_name(self):
-        return 'Batch-' + str(self.number) + '_' + self.crystal_plate.name #needs verification
+        name = 'Batch-' + str(self.number) + '_' + self.crystal_plate.name
+        return name #needs verification
 
 #new class (SPA experimental data)	
 class Batch(SolventBatch, SoakAndCryoValues):

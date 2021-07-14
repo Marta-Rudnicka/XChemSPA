@@ -102,7 +102,7 @@ aside.show button#hide-sidebar {
 .container-cell {
 	background: #e2e2e2 ;
 	max-height: 30em;
-	overflow: auto;
+	overflow: scroll;
 }
 
 .container-cell-hidden {

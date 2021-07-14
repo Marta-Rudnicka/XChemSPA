@@ -31,6 +31,7 @@ export class Cryo extends Soak {
 			cryoConc: null,
 			cryoLocation: null,
 			batches: [],
+			initialBatchStatus: "Waiting for cryo parameters",
 		}
 	}
 
@@ -116,7 +117,7 @@ export class Cryo extends Soak {
 			batch.status = "Ready to generate input file for Echo."
 		}
 		else{
-			batch.status = "Waiting for cryo parameters"
+			batch.status = this.state.initialBatchStatus;
 		}
 	}
 
@@ -156,7 +157,7 @@ export class Cryo extends Soak {
 		//check if it makes sense to generate the files:
 		this.state.batches.forEach(batch => {
 			if (batch.included){
-				if (batch.status === "Waiting for cryo parameters"){
+				if (batch.status === this.state.initialBatchStatus){
 					alert("Cryo stock concentration, desired cryo concentration and cryo location need to be set before generating files!");
 					return;
 				}
@@ -174,6 +175,7 @@ export class Cryo extends Soak {
 				data.append("cryo_frac", batch.cryo_frac);
 				data.append("cryo_stock_frac", batch.cryo_stock_frac);
 				data.append("cryo_location", batch.cryo_location);
+				data.append("cryo_status", "file")
 
 				const url = '/api/update_batch/' + batch.id + '/';
 				axios.put(url, data);
@@ -181,6 +183,19 @@ export class Cryo extends Soak {
 			}
 		});
 		this.setState({batches : batchesCopy });
+	}
+
+	addInitialBatchData(batches){
+		batches.forEach(batch => {
+			batch.included = true;
+			if (batch.cryo_status){
+				batch.status = batch.cryo_status;
+			}
+			else{
+				batch.status = this.state.initialBatchStatus; 
+			}
+		})
+		return batches;
 	}
 
 

@@ -1,5 +1,10 @@
 from django.http.response import JsonResponse, HttpResponse
-from tools.uploads_downloads import import_crystal_data_from_textrank, create_validated_combinations
+from tools.uploads_downloads import (
+    import_crystal_data_from_textrank, 
+    create_validated_combinations, 
+    make_shifter_output_line,
+    add_shifter_data,
+)
 from API.models import CrystalPlate, Batch, Crystal, SpaCompound, Lab
 from django.shortcuts import render
 from .helpers import (
@@ -17,8 +22,11 @@ from tools.validators import (
     valid_batch_JSON_data,
     combinations_form_is_valid,
     valid_combinations_file,
+    valid_utcstr_date,
+    batch_eligible_for_soak_time,
+    shifter_input_is_valid,
 )
-from tools.conversions import create_well_dict
+from tools.conversions import create_well_dict, js_utcstr_to_python_date
 from django.http import HttpResponseRedirect
 from django.core.files.storage import FileSystemStorage
 from API.models import Proposals
@@ -115,7 +123,6 @@ def create_combinations(request):
 def create_batches(request):
     
     if request.method == "POST":
-        print('posted to create_batches')
         batches_str = request.POST.get("batches", False)
         visit = request.POST.get("visit", False) #TODO validate visit
         print(batches_str)
@@ -212,6 +219,80 @@ def serve_cryo_echo_file(request, pk, soak):
             response['Content-Disposition'] = "attachment; filename=%s" % filename
 	
     return response
+
+def add_transfer_date(request, pk, attr):
+    if request.method == "POST":
+        batch = Batch.objects.get(pk=pk)
+        error_log = []
+        date_str = request.POST.get("date_str", False)
+        if valid_utcstr_date(date_str, error_log):
+            timestamp = js_utcstr_to_python_date(date_str)
+            setattr(batch, attr, timestamp)
+            if attr == 'soak_timestamp':
+                batch.soak_status = "soaking"
+            else:
+                batch.cryo_status = "done"
+            batch.save()
+
+            return HttpResponse(status=201)
+        else:
+            return render_error_page(request, error_log)
+
+def add_soak_time(request, pk):
+    if request.method == "POST":
+        batch = Batch.objects.get(pk=pk)
+        error_log = []
+        if not batch_eligible_for_soak_time(batch, error_log):
+            return render_error_page(request, error_log)
+        
+        date_str = request.POST.get("date_str", False)
+        if valid_utcstr_date(date_str, error_log):
+            end_soak = js_utcstr_to_python_date(date_str)
+            batch.soaking_time = (end_soak - batch.soak_timestamp)
+            batch.soak_status = "done"
+            batch.save()
+
+            return HttpResponse(status=201)
+        else:
+            return render_error_page(request, error_log)
+
+def serve_shifter_input(request, pk):
+    batch = Batch.objects.get(pk=pk)
+    output = []
+    file_path = 'shifter_out.csv'
+
+    with open(file_path, 'r+') as f:
+        f.truncate(0)
+        
+        for c in batch.crystals.all():
+            f.write(make_shifter_output_line(c))
+        f.close()
+
+        with open(file_path, 'r+') as f:
+            filename = batch.batch_name() + '_shifter.csv'
+            response = HttpResponse(f, content_type='text/csv')
+            response['Content-Disposition'] = "attachment; filename=%s" % filename
+    return response
+
+def import_shifter_data(request, pk):
+    if request.method == "POST":
+        error_log = []
+        batch = Batch.objects.get(pk=pk)
+        source = request.FILES["input_file"]
+        fs = FileSystemStorage()
+        file_name = fs.save(source.name, source)
+        if shifter_input_is_valid(file_name, error_log, batch):
+            print('valid shifter input')
+            fs = FileSystemStorage()
+            file_name = fs.save(source.name, source)
+            add_shifter_data(file_name, batch)
+            fs.delete(file_name)
+            return HttpResponseRedirect('/harvesting/')
+        else:
+            fs.delete(file_name)
+            print('valid shifter input')
+            return render_error_page(request, error_log)  
+    
 
 def render_error_page(request, error_log):
     return render(request, "XChemSPA_backend/errors.html", {'error_log': error_log})

@@ -16,6 +16,7 @@ export class Header extends Component {
 		let batches='nav-link';
 		let soak='nav-link';
 		let cryo='nav-link';
+		let harvesting='nav-link';
 		let visit='nav-link';
 		
 		switch(this.props.active){
@@ -35,6 +36,9 @@ export class Header extends Component {
 				soak = "nav-link active"
 				break;		
 			case "cryo":
+				cryo = "nav-link active"
+				break;
+			case "harvesting":
 				cryo = "nav-link active"
 				break;
 			case "visit":
@@ -58,7 +62,7 @@ export class Header extends Component {
 							<li className="nav-item"><Link to="/batches/" className={batches}>Batches </Link></li>
 							<li className="nav-item"><Link to='/soak/' className={soak}>Soaking </Link></li>
 							<li className="nav-item"><Link to='/cryo/' className={cryo}>Cryo </Link></li>
-							<li className="nav-item"><a className="nav-link" href="#">Harvesting </a></li>   
+							<li className="nav-item"><Link to='/harvesting/' className={harvesting}>Harvesting </Link></li>   
 							<li className="nav-item"><a className="nav-link" href="#">Data Collection </a></li>
 							<li className="nav-item"><Link to='/visit/' className={visit}>ChangeVisit </Link></li>   
 						</ul>
