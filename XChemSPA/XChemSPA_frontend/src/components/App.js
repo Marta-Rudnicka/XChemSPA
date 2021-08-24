@@ -56,12 +56,7 @@ class App extends Component {
 						
 						<Switch>	 
 						  <Route path="/source/">
-						  	{this.state.visit ? 
-						  	<Source switchActive={this.switchActive} 
-							  proposal={this.state.proposal}
-							  visit={this.state.visit}
-							  /> : 
-							  <Redirect to="/visit/" /> }
+						  	<Source switchActive={this.switchActive} proposal={this.state.proposal} visit={this.state.visit}/>
 						  </Route>
 						  <Route path="/crystals/">
 						  	{this.state.visit ? 
@@ -105,3 +100,49 @@ class App extends Component {
 ReactDOM.render(<App />, document.getElementById('app'));
 
 //<Source proposal="placeholder_value"/>
+
+/*
+<Provider store={store}>
+                <Fragment>
+					<Router>
+						<Header active={this.state.active} visit={this.state.visit} />
+						
+						<Switch>	 
+						  <Route path="/source/">
+						  	{this.state.visit ? <Source switchActive={this.switchActive} proposal={this.state.proposal} visit={this.state.visit}/> : <Redirect to="/visit/" /> }
+						  </Route>
+						  <Route path="/crystals/">
+						  	{this.state.visit ? 
+						  	<Crystals switchActive={this.switchActive} 
+							visit={this.state.visit} 
+							proposal={this.state.proposal}/> : 
+							<Redirect to="/visit/" /> }
+						  </Route>
+						  <Route path="/batches/">
+							{this.state.visit ? 
+							<Batches switchActive={this.switchActive}
+							proposal={this.state.proposal}
+							visit={this.state.visit}
+							/> : 
+							<Redirect to="/visit/" /> }
+						  </Route>
+						  <Route path="/soak/">
+							{this.state.visit ? <Soak switchActive={this.switchActive} proposal={this.state.proposal}/> : <Redirect to="/visit/" /> }
+						  </Route>
+						  <Route path="/cryo/">
+							{this.state.visit ? <Cryo switchActive={this.switchActive} proposal={this.state.proposal}/> : <Redirect to="/visit/" /> }
+						  </Route>
+						  <Route path="/harvesting/">
+							{this.state.visit ? <Harvesting switchActive={this.switchActive} proposal={this.state.proposal}/> : <Redirect to="/visit/" /> }
+						  </Route>
+						  <Route path="/visit/">
+							<Visit switchActive={this.switchActive} setVisit={this.setVisit} setProposal={this.setProposal}/>
+						  </Route>
+						   <Route path="/">
+						   {this.state.visit ? <Home switchActive={this.switchActive}/> : <Redirect to="/visit/" /> }
+						  </Route>
+						</Switch>
+					</Router>
+                </Fragment>
+            </Provider>
+			*/

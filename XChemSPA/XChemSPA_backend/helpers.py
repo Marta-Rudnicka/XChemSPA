@@ -1,6 +1,6 @@
 from API.models import (
     CompoundCombination,
-    Proposals,
+    Project,
     LibraryPlate, 
     LibrarySubset, 
     SpaCompound, 
@@ -9,6 +9,7 @@ from API.models import (
     Crystal,
     CrystalPlate,
     )
+from tools.string_parsers import get_proposal_from_visit, get_project_from_visit
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 import re
@@ -17,14 +18,6 @@ import json
 def render_error_page(request, error_log):
     '''error_log - list of HTML strings to display'''
     return render(request, "XChemSPA_backend/error_log.html", {'error_log': error_log})
-
-def get_proposal_from_visit(visit):
-    visit_pattern = '([A-Za-z0-9_]+)(\-[0-9]+)'
-    p = re.fullmatch(visit_pattern, visit)
-    try:
-        return p.group(1)
-    except AttributeError:
-        return ""
 
 '''IMPORTING DATA INTO SPACOMPOUNDS'''
 
@@ -50,14 +43,14 @@ def get_compounds_from_subset(subset, plate):
 
 def create_spa_compound(sw, visit):
     
-     SpaCompound.objects.create(
-                visit=visit, 
-                library_name=sw.library_plate.library.name, 
-                library_plate=sw.library_plate.barcode, 
-                well=sw.well, 
-                code=sw.compound.code, 
-                smiles=sw.compound.smiles
-                )
+    SpaCompound.objects.create(
+        project=get_project_from_visit(visit), 
+        library_name=sw.library_plate.library.name, 
+        library_plate=sw.library_plate.barcode, 
+        well=sw.well, 
+        code=sw.compound.code, 
+        smiles=sw.compound.smiles
+        )
 
 def add_new_spa_compounds(source_wells, visit, allow_duplicates):
     if allow_duplicates:
@@ -66,21 +59,22 @@ def add_new_spa_compounds(source_wells, visit, allow_duplicates):
     else:
         for sw in source_wells:
             try:
-                SpaCompound.objects.get(visit=visit, smiles=sw.compound.smiles, code=sw.compound.code)
+                SpaCompound.objects.get(project=get_project_from_visit(visit), smiles=sw.compound.smiles, code=sw.compound.code)
             except ObjectDoesNotExist:
                 create_spa_compound(sw, visit)
            
 def get_unused_spa_compounds(visit):
-    return SpaCompound.objects.filter(visit=visit, crystal=None)
+    return SpaCompound.objects.filter(project=get_project_from_visit(visit), lab_data=None)
 
 def import_new_spa_compounds(visit, subset_dictionary, allow_duplicates):
-    p = get_proposal_from_visit(visit)
-    proposal = Proposals.objects.get(proposal=p)
-    for library in proposal.libraries.all():
+    #p = get_proposal_from_visit(visit)
+    #proposal = Project.objects.get(proposal=p)
+    project = get_project_from_visit(visit)
+    for library in project.libraries.all():
         source_wells = get_compounds_from_library(library)
         add_new_spa_compounds(source_wells, visit, allow_duplicates)
 
-    for subset in proposal.subsets.all():
+    for subset in project.subsets.all():
         source_wells = []
         for plate_id in subset_dictionary[subset.id]:
             plate = LibraryPlate.objects.get(pk=plate_id)
@@ -122,7 +116,7 @@ def create_batch(dict, visit):
     crystal_plate_id = int(dict["crystalPlate"])
     cp = CrystalPlate.objects.get(pk=crystal_plate_id)
     print('New batch. number: ', number, ", crystal_plate: ", cp)
-    newBatch = Batch.objects.create(number = number, crystal_plate = cp, visit=visit)
+    newBatch = Batch.objects.create(number = number, crystal_plate = cp, project=get_project_from_visit(visit))
     return newBatch
 
 def create_lab_objects(batch_object, batch_dictionary, visit):
@@ -138,7 +132,7 @@ def create_lab_objects(batch_object, batch_dictionary, visit):
                 crystal_name = crystal, 
                 single_compound = compound, 
                 batch = batch_object,
-                visit = visit
+                project = get_project_from_visit(visit)
                 )
         else:
             compound = CompoundCombination.objects.get(pk=compound_id)
@@ -146,7 +140,7 @@ def create_lab_objects(batch_object, batch_dictionary, visit):
                 crystal_name = crystal, 
                 compound_combination = compound, 
                 batch = batch_object,
-                visit = visit
+                project = get_project_from_visit(visit)
                 )
 
         i += 1

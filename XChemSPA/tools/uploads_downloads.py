@@ -1,7 +1,8 @@
 from tools.conversions import shifter_2_datetime, shifter_2_drop_name, shifter_2_timedelta
 from django.core.exceptions import ObjectDoesNotExist
-from API.models import CompoundCombination, Crystal, SpaCompound
+from API.models import CompoundCombination, Crystal, SpaCompound, Lab
 from .validators import valid_texrank_file, get_index_from_headers
+from .string_parsers import get_project_from_visit
 import csv
 
 def import_crystal_data_from_textrank(file_name, crystal_plate, visit):
@@ -23,7 +24,7 @@ def import_crystal_data_from_textrank(file_name, crystal_plate, visit):
                     echo_x = row[1],
                     echo_y = row[2],
                     score = row[3],
-                    visit = visit,
+                    project = get_project_from_visit(visit),
                     )
             
 def create_validated_combinations(file_name, visit):
@@ -34,7 +35,7 @@ def create_validated_combinations(file_name, visit):
             reader = csv.reader(csvfile, dialect)
             header = next(reader, None)
             indices = get_index_from_headers(header)
-            starting_number = CompoundCombination.objects.filter(visit=visit).count()
+            starting_number = CompoundCombination.objects.filter(project=get_project_from_visit(visit)).count()
             csvfile.seek(0)
             next(reader)
             for row in reader:
@@ -46,21 +47,34 @@ def update_combinations(line, indices, visit, starting_number):
     combination = line[indices["combination"]]
     c_num = int(combination) + starting_number
     try:
-        c = CompoundCombination.objects.get(visit=visit, number=c_num)
+        c = CompoundCombination.objects.get(project=get_project_from_visit(visit), number=c_num)
     except ObjectDoesNotExist:
-        c = CompoundCombination.objects.create(visit=visit, number=c_num)
-        print('New CompoundCombination: ', visit, c_num)
+        c = CompoundCombination.objects.create(project=get_project_from_visit(visit), number=c_num)
     
     if indices["code"] != None and indices["smiles"] !=None:
+        #the columns might exist, but the data might not be there
         code = line[indices["code"]]
         smiles = line[indices["smiles"]]
         if code and smiles:
-            spa_c = SpaCompound.objects.filter(code=code, smiles=smiles, visit=visit, lab_data=None)[0]
+            spa_c = SpaCompound.objects.filter(code=code, smiles=smiles, project=get_project_from_visit(visit), lab_data=None)[0]
             print('Adding compound: ', spa_c, spa_c.library_name, spa_c.code, spa_c.well)
             c.compounds.add(spa_c)
             c.save()
+            return
     
-    #TODO Add based on related_crystal
+     #TODO Test and debug the commented code below (adding compounds based on related_crystal)
+    '''
+    #if no code and smiles were provided, get the compounds based on related_crystal
+    rel_crystal_name = line[indices["related_crystal"]]
+    related_lab = Lab.objects.filter(crystal_name__crystal_name = rel_crystal_name)
+    if related_lab.single_compound:
+        c.compound.add(related_lab.single_compound)
+    elif related_lab.compound_combination:
+        for compound in related_lab.compound_combination.compounds:
+            c.compound.add(compound)
+        c.save()
+   ''' 
+   
 
 def make_shifter_output_line(lab):
     well_number = lab.crystal_name.well[1:3]

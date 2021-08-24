@@ -29,7 +29,7 @@ export default class Visit extends Component {
     }
 	
     queryProposal(string){
-        const apiUrl = '/api/proposals/' + string +'/';
+        const apiUrl = '/api/project/' + string +'/';
         axios.get(apiUrl)
             .then(res => {
             const proposal = res.data;

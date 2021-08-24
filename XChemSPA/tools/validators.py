@@ -1,18 +1,15 @@
 from datetime import datetime
-from API.models import CompoundCombination, CrystalPlate, Proposals, LibraryPlate, LibrarySubset, SpaCompound, Crystal
+from API.models import CompoundCombination, CrystalPlate, Project, LibraryPlate, LibrarySubset, SpaCompound, Crystal
 from django.core.exceptions import ObjectDoesNotExist
 import re
 import csv
 import json
-from .string_parsers import get_proposal_from_visit
+from .string_parsers import get_proposal_from_visit, get_project_from_visit
 from .conversions import js_utcstr_to_python_date, shifter_2_datetime, shifter_2_drop_name, shifter_2_timedelta
 
-def update_error_log(error_log, err_string):
-    try:
-        error_log.append(err_string)
-        return True
-    except (AttributeError) as e:
-        return False
+def update_error_log(error_message, log):
+	line = "<p>" + error_message + "</p>"
+	log.append(line)
 
 def valid_import_mode(value, error_log):
     if value in ["add", "redo", "double"]:
@@ -58,7 +55,7 @@ def get_object(model, pk, error_log):
     print('get_object', model, pk, error_log )
     output = {}
     try:
-        if model == Proposals:
+        if model == Project:
             object = model.objects.get(proposal=pk)
         else:
             object = model.objects.get(pk=pk)
@@ -92,7 +89,7 @@ def import_compounds_form_is_valid(post_data):
             pass
         elif key=='visit':
             p = get_proposal_from_visit(value)
-            get_proposal = get_object(Proposals, p, error_log)
+            get_proposal = get_object(Project, p, error_log)
             proposal = get_proposal["object"]
             if not get_proposal["valid"]:
                 valid = False
@@ -147,7 +144,7 @@ def import_crystals_form_is_valid(post_data):
         elif key=='visit':
             p = get_proposal_from_visit(value)
             try:
-                Proposals.objects.get(proposal=p)
+                Project.objects.get(proposal=p)
             except ObjectDoesNotExist:
                 update_error_log[error_log, "Unrecognised proposal in the visit"]
                 valid = False
@@ -400,7 +397,7 @@ def combinations_form_is_valid(post_data, error_log):
             visit = value
             p = get_proposal_from_visit(value)
             try:
-                Proposals.objects.get(proposal=p)
+                Project.objects.get(proposal=p)
                 print('valid visit')
             except ObjectDoesNotExist:
                 update_error_log[error_log, "Unrecognised proposal string in the visit"]
@@ -517,7 +514,7 @@ def valid_combination_number(number, error_log, line_num):
         return False
 
 def valid_compound(code, smiles, visit, error_log, line_num):
-    if SpaCompound.objects.filter(visit=visit, code=code, smiles=smiles).count() > 0:
+    if SpaCompound.objects.filter(project=get_project_from_visit(visit), code=code, smiles=smiles).count() > 0:
         return True
     else:
         update_error_log(error_log, "Line {line_num}: compound not found: {code} : {smiles}".format(line_num=line_num, code=code, smiles=smiles))
@@ -525,7 +522,7 @@ def valid_compound(code, smiles, visit, error_log, line_num):
 
 def valid_related_crystal(crystal_name, visit, error_log, line_num):
     try:
-        Crystal.objects.get(crystal_name=crystal_name, visit=visit)
+        Crystal.objects.get(crystal_name=crystal_name, project=get_project_from_visit(visit))
         return True
     except ObjectDoesNotExist:
         update_error_log(error_log, "Line {line_num}: crystal not found: {crystal_name}".format(line_num=line_num, crystal_name=crystal_name))

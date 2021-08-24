@@ -19,10 +19,10 @@ class SubsetSelect extends React.Component {
   }
   
   countCurrent(){
-    try {
+    if (this.state.library) {
         return this.state.library.plates.filter(plate => plate.current).length;
     }
-    catch(err){
+    else {
         return 0;
     }
   }
@@ -52,12 +52,12 @@ class SubsetSelect extends React.Component {
         selects = [];
         for (let i = 1; i <= current_plates_count; i++){
           const sel = (
-				<p key ={i}>
-                  <select name={this.props.subset.id + '-' + i} required>
-                    <option value="">Select plate...</option>
-                    {options}
-                  </select>
-                </p>
+				      <p key ={i}>
+                 <select name={this.props.subset.id + '-' + i} required>
+                  <option value="">Select plate...</option>
+                  {options}
+                </select>
+              </p>
           );
           selects.push(sel);        
         }

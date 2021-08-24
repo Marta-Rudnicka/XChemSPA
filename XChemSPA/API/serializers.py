@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CompoundCombination, Crystal, CrystalPlate, Lab, Proposals, Library, SpaCompound, Batch
+from .models import CompoundCombination, Crystal, CrystalPlate, Lab, Project, Library, SpaCompound, Batch
 
 class LibrarySerializer(serializers.ModelSerializer):
 	class Meta:
@@ -12,7 +12,7 @@ class SpaCompoundSerializer(serializers.ModelSerializer):
 		model = SpaCompound
 		fields = [
 			'id', 
-			'visit', 
+			'project', 
 			'library_name', 
 			'library_plate', 
 			'well', 
@@ -29,12 +29,12 @@ class LibrarySubsetSerializer(serializers.Serializer):
 	size = serializers.IntegerField()
 
 
-class ProposalDetailSerializer(serializers.Serializer):
+class ProjectDetailSerializer(serializers.Serializer):
 	proposal = serializers.CharField(max_length=32)
 	libraries = LibrarySerializer(many=True)
 	subsets = LibrarySubsetSerializer(many=True)	
 	class Meta:
-		model = Proposals
+		model = Project
 		fields = ["proposal", "libraries", "subsets"]
 		lookup_field = "proposal"
 
@@ -58,7 +58,7 @@ class CrystalPlateSerializer(serializers.Serializer):
 	name = serializers.CharField(max_length=64)
 	drop_volume = serializers.FloatField()
 	plate_type = serializers.CharField(max_length=64)
-	visit = serializers.CharField(max_length=64)
+	project = ProjectDetailSerializer(many=False)
 	crystals = CrystalSerializer(many=True)
 
 	class Meta:
@@ -75,7 +75,7 @@ class LabSerializer(serializers.ModelSerializer):
 			'single_compound', 
 			'batch',
 			'compound_combination', 
-			'visit', 
+			'project', 
 			'harvest_status',
 			'mounting_result',
 			'mounting_time',
@@ -117,5 +117,5 @@ class BatchSerializer(serializers.ModelSerializer):
 class CompoundCombinationSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = CompoundCombination
-		fields = ['id', 'visit', 'number', 'compounds', 'related_crystals', 'lab_data']
+		fields = ['id', 'project', 'number', 'compounds', 'related_crystals', 'lab_data']
 		depth = 1

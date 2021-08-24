@@ -8,7 +8,6 @@ from tools.uploads_downloads import (
 from API.models import CrystalPlate, Batch, Crystal, SpaCompound, Lab
 from django.shortcuts import render
 from .helpers import (
-    get_proposal_from_visit, 
     import_new_spa_compounds, 
     overwrite_old_import, 
     render_error_page, 
@@ -16,6 +15,7 @@ from .helpers import (
     create_batch,
     create_lab_objects
 )
+from tools.string_parsers import get_project_from_visit, get_proposal_from_visit
 from tools.validators import (
     import_compounds_form_is_valid, 
     import_crystals_form_is_valid, 
@@ -29,7 +29,7 @@ from tools.validators import (
 from tools.conversions import create_well_dict, js_utcstr_to_python_date
 from django.http import HttpResponseRedirect
 from django.core.files.storage import FileSystemStorage
-from API.models import Proposals
+from API.models import Project
 from django.core.exceptions import ObjectDoesNotExist
 from datetime import date
 import json
@@ -38,7 +38,6 @@ def import_compounds(request):
     if request.method == "POST":
         if import_compounds_form_is_valid(request.POST)["valid"]:
             subset_dictionary = get_subset_dictionary(request.POST)
-            print('subset_dictionary: ', subset_dictionary)
             mode = request.POST.get("mode", False)
             visit = request.POST.get("visit", False)
         
@@ -64,8 +63,8 @@ def import_new_crystals(request):
             name = request.POST.get("barcode", False)
             drop_volume = float(request.POST.get("drop_volume", False))
             plate_type = request.POST.get("plate_type", False)
-            crystal_plate = CrystalPlate.objects.create(name=name, drop_volume=drop_volume, plate_type=plate_type)
             visit = request.POST.get("visit", False)
+            crystal_plate = CrystalPlate.objects.create(name=name, drop_volume=drop_volume, plate_type=plate_type, project=get_project_from_visit(visit))
             source = request.FILES["data_file"]
             fs = FileSystemStorage()
             file_name = fs.save(source.name, source)
@@ -80,41 +79,30 @@ def verify_visit(request):
         visit = request.POST.get("visit", False)
         p = get_proposal_from_visit(visit)
         try:
-            Proposals.objects.get(proposal=p)
+            Project.objects.get(proposal=p)
             json = {"verified_visit": visit}
             return JsonResponse(json, safe=False)
 
         except ObjectDoesNotExist:
-            print('Bad visit')
             return HttpResponseRedirect('/visit/')
 
 def create_combinations(request):
     if request.method == "POST":
         error_log = []
         if combinations_form_is_valid(request.POST, error_log):
-            print(request.POST)
-            print('valid form')
-        
+            
             fs = FileSystemStorage()
             source = request.FILES["data_file"]
             file_name = fs.save(source.name, source)
             visit = request.POST.get("visit", False)
 
             if valid_combinations_file(file_name, visit, error_log):
-                print('valid file')
                 create_validated_combinations(file_name, visit)
                 fs.delete(file_name)
             else:
-                print('invalid file')
                 fs.delete(file_name)
                 return render_error_page(request, error_log)
-                #visit = request.POST.get("visit", False)
-                
-                #fs = FileSystemStorage()
-                #file_name = fs.save(source.name, source)
-                #create_combinations(file_name, visit)
-           
-            
+                 
             return render_ok_page(request)
         else:
             print('invalid form')

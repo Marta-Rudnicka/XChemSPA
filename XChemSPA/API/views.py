@@ -11,7 +11,7 @@ from .serializers import (
 	CompoundCombinationSerializer, 
 	CrystalSerializer, 
 	LabSerializer, 
-	ProposalDetailSerializer, 
+	ProjectDetailSerializer, 
 	LibrarySerializer, 
 	SpaCompoundSerializer, 
 	CrystalPlateSerializer,
@@ -21,7 +21,7 @@ from .serializers import (
 from .models import (
 	CompoundCombination,
 	CrystalPlate, 
-	Proposals, 
+	Project, 
 	Library, 
 	SpaCompound, 
 	Crystal, 
@@ -29,12 +29,14 @@ from .models import (
 	Batch
 	)
 
-class ProposalsDetail(generics.RetrieveUpdateAPIView):
+from tools.string_parsers import get_project_from_visit
+
+class ProjectDetail(generics.RetrieveUpdateAPIView):
 	permission_classes = [AllowAny]
 	
-	queryset = Proposals.objects.all()	
+	queryset = Project.objects.all()	
 	lookup_field = "proposal"
-	serializer_class = ProposalDetailSerializer
+	serializer_class = ProjectDetailSerializer
 
 class LibraryDetail(generics.RetrieveAPIView):
 	queryset = Library.objects.all()
@@ -44,7 +46,7 @@ class LibraryDetail(generics.RetrieveAPIView):
 class SourceCompoundList(generics.ListAPIView):
 	def get_queryset(self):
 		proposal = self.kwargs['proposal']
-		return SpaCompound.objects.filter(visit__contains=proposal)
+		return SpaCompound.objects.filter(project__proposal=proposal)
 	
 	permission_classes = [AllowAny]
 	serializer_class = SpaCompoundSerializer
@@ -54,7 +56,7 @@ class SourceCompoundList(generics.ListAPIView):
 class CrystalPlateList(generics.ListAPIView):
 	def get_queryset(self):
 		proposal = self.kwargs['proposal']
-		return CrystalPlate.objects.filter(visit__contains=proposal)
+		return CrystalPlate.objects.filter(project__proposal=proposal)
 
 	permission_classes = [AllowAny]
 	serializer_class = CrystalPlateSerializer
@@ -64,7 +66,7 @@ class CrystalPlateList(generics.ListAPIView):
 class CrystalPlateList(generics.ListAPIView):
 	def get_queryset(self):
 		proposal = self.kwargs['proposal']
-		return CrystalPlate.objects.filter(visit__contains=proposal)
+		return CrystalPlate.objects.filter(project__proposal=proposal)
 
 	permission_classes = [AllowAny]
 	serializer_class = CrystalPlateSerializer
@@ -84,7 +86,7 @@ class LabDetail(generics.RetrieveAPIView):
 class LabsByProposal(generics.ListAPIView):
 	def get_queryset(self):
 		proposal = self.kwargs['proposal']
-		return Lab.objects.filter(visit__contains=proposal)
+		return Lab.objects.filter(project__proposal=proposal)
 	
 	permission_classes = [AllowAny]
 	serializer_class = LabSerializer
@@ -97,7 +99,7 @@ class BatchDetail(generics.RetrieveAPIView):
 class BatchesByProposal(generics.ListAPIView):
 	def get_queryset(self):
 		proposal = self.kwargs['proposal']
-		return Batch.objects.filter(visit__contains=proposal)
+		return Batch.objects.filter(project__proposal=proposal)
 	
 	permission_classes = [AllowAny]
 	serializer_class = BatchSerializer
@@ -105,7 +107,7 @@ class BatchesByProposal(generics.ListAPIView):
 class CompoundCombinations(generics.ListAPIView):
 	def get_queryset(self):
 		visit = self.kwargs['visit']
-		return CompoundCombination.objects.filter(visit=visit)
+		return CompoundCombination.objects.filter(project=get_project_from_visit(visit))
 	
 	permission_classes = [AllowAny]
 	serializer_class = CompoundCombinationSerializer

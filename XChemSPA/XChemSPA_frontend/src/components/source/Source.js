@@ -2,14 +2,16 @@ import React, { Component } from 'react';
 import ImportForm from './import_form.js';
 import PlateRow from './plate_row.js';
 import axios from 'axios';
-import {groupCompoundsByPlate} from '../reusable_components/functions.js';
+import {groupCompoundsByPlate, groupCompoundsIntoCombinations} from '../reusable_components/functions.js';
+import CocktailForm from './cocktail_form.js';
 
 class Source extends Component {
   constructor(props){
     super(props);
     this.state = {
       plates: null,
-      proposalData: null,
+      combinations: null,
+      projectData: null,
       compoundCount: 0,
       allUsed: 0,
       allUnused: 0,      
@@ -18,31 +20,48 @@ class Source extends Component {
     
   componentDidMount(){
     this.props.switchActive("source");
+    console.log('downloading project data in Source')
+    console.log(this.props)
+    let combinations = [];
     
-    let apiUrl = '/api/proposals/' + this.props.proposal + '/';
+    let apiUrl = '/api/project/' + this.props.proposal + '/';
 
     axios.get(apiUrl)
         .then(res => {
-        const proposalData = res.data;
-        this.setState({ proposalData })
+        const projectData = res.data;
+        this.setState({ projectData })
      });
-     
+
+     apiUrl = '/api/combinations/' + this.props.visit + '/';
+
+     axios.get(apiUrl)
+       .then(res => {
+        combinations = res.data;
+        this.setState({combinations});
+     });
+
      apiUrl = '/api/source_compounds/' + this.props.proposal + '/';
 
      axios.get(apiUrl)
        .then(res => {
         const compounds = res.data;
         this.setState({compoundCount: compounds.length})
-        const plates = groupCompoundsByPlate(compounds);
+        let plates = groupCompoundsByPlate(compounds);
+        plates = groupCompoundsIntoCombinations(combinations, plates)
         this.setState({ plates : plates })
       });
 
       this.getTotals();
-    }
+  }
    
-    componentDidUpdate(pervProps, PrevState){
-      if(PrevState.plates !== this.state.plates){
+    componentDidUpdate(pervProps, prevState){
+      if(prevState.plates !== this.state.plates){
         this.getTotals();
+      }
+
+      if (prevState.combinations !== prevState.combinations){
+        const plates = groupCompoundsIntoCombinations(this.state.combinations, this.state.plates);
+        this.setState({ plates });
       }
     }
 
@@ -62,26 +81,28 @@ class Source extends Component {
     }
 
     render() {
-    let rows = null;
 
-    try {
+    let rows = <tr><td colSpan="6">Loading...</td></tr>;
+
+    if (this.state.plates) {
       rows = this.state.plates.map((plate, index) => {
         return(
           <PlateRow key={index} plate={plate} />
           );
       });
     }
-    catch(err){
-      rows = null;
-    }
-     
-    
+   
     return (
         <div id="source">
       <h1>Source compounds</h1>
       <main id="source-main">
         <div id="sidebar">
-        {this.state.proposalData ? <ImportForm proposal={this.state.proposalData} visit={this.props.visit}/> : ""}
+        {this.state.projectData ? 
+          <ImportForm proposal={this.state.projectData} visit={this.props.visit}/>
+          : null}
+        {this.state.compoundCount > 0 ? 
+          <CocktailForm visit={this.props.visit}/>
+          : null}
         </div>
         <div>
           <table className="table" data-toggle="table" data-pagination="true" data-search="true" id="table">

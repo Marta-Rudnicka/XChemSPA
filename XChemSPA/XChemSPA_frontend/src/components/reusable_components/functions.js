@@ -70,6 +70,35 @@ export function addStatusToItems(collection, key){
 	console.log('placeholder');
 }
 
+export function groupCompoundsIntoCombinations(combinations, plates){
+	console.log('fired groupCompoundsIntoCombinations');
+	if (!combinations || !plates || combinations.length === 0 || plates.length === 0){
+		console.log('groupCompoundsIntoCombinations: early return');
+		return;
+	}
+	console.log('start grouping')
+	combinations.forEach(comb => {
+		comb.compounds.forEach(c => {
+			console.log('marking: ', c);
+			markCompoundAsCombined(c, plates);
+		});
+	});
+	return plates;
+}
+
+function markCompoundAsCombined(compound, libraryPlates){
+	console.log('fired markCompoundAsCombined for', compound)
+	libraryPlates.forEach(plate => {
+		console.log('checking: ', plate.library_name, plate.library_plate)
+		if (plate.library_name === compound.library_name && plate.library_plate === compound.library_plate){
+			let found = plate.compounds.find( c => compound.code === c.code);
+			console.log('found combined compound')
+			found.status = "combined";
+		}
+	});	
+}
+
+
 export function leadingZero(string){
 	if (string.length === 1){
 		return '0' + string;

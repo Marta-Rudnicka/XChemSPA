@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from "react-router-dom"
 
 class Home extends React.Component {
 
@@ -15,27 +16,27 @@ class Home extends React.Component {
 				<h2>Manage experiment</h2>
 				<ul>
 					<li>
-						<p><a href='/source/'>Compounds</a> </p>
+						<p><Link to="/source/">Compounds</Link> </p>
 						<p>The page to import the data of previously selected compounds and see summary view of the selection.</p>
 					</li>
 					<li>
-						<p><a href='/crystals/'>Crystals</a> </p>
+						<p><Link to="/crystals/">Crystals</Link> </p>
 						<p>The page to upload crystal data and make final decision about which crystals to include in the experiment</p>
 					</li>
 					<li>
-						<p><a href='/batches/'>Batches</a> </p>
+						<p><Link to="/batches/">Batches </Link></p>
 						<p>The page to match crystals with compounds and create input files for Echo.</p>
 					</li>
 					<li>
-						<p><a href='/soak/'>Soak</a> </p>
+						<p><Link to='/soak/'>Soaking </Link></p>
 						<p>The page to manage the soaking process: create input for Echo and monitor the progress.</p>
 					</li>
 					<li>
-						<p><a href='/cryo/'>Cryo</a> </p>
+						<p><Link to='/cryo/'>Cryo </Link></p>
 						<p>The page to manage the application of cryoprotectant.</p>
 					</li>
 					<li>
-						<p><a href='/harvesting/'>Harvesting</a> </p>
+						<p><Link to='/harvesting/'>Harvesting </Link></p>
 						<p>Manage exchange of data with Shifter and barcode reader.</p>
 					</li>
 				</ul>

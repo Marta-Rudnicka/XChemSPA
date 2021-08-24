@@ -30,10 +30,10 @@ class Batches extends Component {
 
 		this.state={
 			asideClass: 'collapsed',
-			existingBatches: null,
+			existingBatches: [],
 			libraryPlates: null,
 			crystalPlates: null,
-			combinations: null,
+			combinations: [],
 			singleSoak: true,
 			matches: [],
 			batchSize : 0,
@@ -185,8 +185,10 @@ class Batches extends Component {
 		this.state.libraryPlates.forEach(plate => { 
 			if (plate.library_name === compound.library_name && plate.name === compound.library_plate){
 				let found = plate.items.find( c => compound.code === c.code);
-				found.status = "combined";
-				plate.excludeItems(1) ;
+				if (found){
+					found.status = "combined";
+					plate.excludeItems(1) ;
+				}
 			}
 		});	
 	}
