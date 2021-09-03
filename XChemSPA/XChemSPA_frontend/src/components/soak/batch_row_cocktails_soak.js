@@ -56,11 +56,8 @@ export class BatchRowCocktailSoak extends basicCocktailMixin(cocktailBatchInfoMi
 	}
 
 	trackDownloads(i){
-		console.log('trackDownloads', i);
 		let counterCopy = [... this.state.soakCounter]
-		console.log('counterCopy: ', counterCopy)
 		counterCopy = removeFromArray(counterCopy, [i]);
-		console.log('counterCopy after removal: ', counterCopy)
 		if (counterCopy.length === 0){
 			this.handleFileDownload();
 		}

@@ -1,17 +1,52 @@
 import React, { Component } from 'react';
 
 export class Combinations extends Component {
+	
+
+	groupCombinationsByPlates(combinations){
+		let plates = [];
+
+		combinations.forEach(comb => {
+			comb.compounds.forEach( c => {
+				const plate = this.getPlate(plates, c.library_name, c.library_plate)
+				if (comb.status === "used"){
+					plate.used ++;
+				}
+				else {
+					plate.unused ++;
+				}
+			});
+		});
+		return plates
+	}
+
+	getPlate(array, library_name, plate_name){
+		//find the right plate in the array, or create a new one if it doesn't exist
+		let found = array.find(plate => plate.library_name === library_name && plate.plate_name === plate_name);
+		if (found === undefined){
+			found = {
+				library_name : library_name,
+				plate_name : plate_name,
+				unused : 0,
+				used : 0
+			}
+			array.push(found);
+		}
+		return found;
+	}
+	
     render() {
 		let compoundsTotal = 0;
-		const rows = this.props.combinations.map(plate=>{
-			compoundsTotal = compoundsTotal + plate.items;
+		console.log('this.props.combinations', this.props.combinations)
+		const rows = this.groupCombinationsByPlates(this.props.combinations).map((plate, index) =>{
+			
 			return (
-				<tr key={plate.id}>
-					<td>{plate.library}</td>
-					<td>{plate.plate}</td>
-					<td>{plate.combinations}</td>
-					<td>{plate.items}</td>
-					<td>TODO</td>
+				<tr key={index}>
+					<td>{plate.library_name}</td>
+					<td>{plate.plate_name}</td>
+					<td>{plate.unused + plate.used}</td>
+					<td>{plate.unused}</td>
+					<td>{plate.used}</td>
 				</tr>
 			)
 		});
@@ -23,20 +58,14 @@ export class Combinations extends Component {
 					<tr>
 						<th>Library</th>
 						<th>Plate</th>
-						<th>Combi-<br/>nations</th>
-						<th>Compounds</th>
-						<th className="unused-compounds">Unused</th>
+						<th>Compounds in <br/> combinations</th>
+						<th>Unused</th>
+						<th className="unused-compounds">Used</th>
 					</tr>
 				</thead>
 				<tbody>
 					{rows}
 				</tbody>
-				<tfoot>
-					<tr>
-						<td colSpan="2"><strong>Total:</strong></td>
-						<td id="total-compounds">{compoundsTotal}</td>
-					</tr>
-				</tfoot>
 			</table>
         );
     }

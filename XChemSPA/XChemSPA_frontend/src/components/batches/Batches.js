@@ -266,10 +266,9 @@ class Batches extends Component {
 
 	reNumberBatchesWrapper(){
 		//for methods that do not otherwise process on a copy if this.state.matches
-		if (this.state.matches.length > 0)
-			if (this.state.matches.length === 0) {
-				return;
-			}
+		if (this.state.matches.length === 0) {
+			return;
+		}
 		let matchesCopy = [];
 		this.state.matches.forEach(match=> matchesCopy.push(match.copySelf()));
 		matchesCopy = this.reNumberBatches(matchesCopy);
@@ -387,7 +386,7 @@ class Batches extends Component {
 					hideSidebar = {this.hideSidebar}
 				>
 					<LibraryPlates libraryPlates={this.state.libraryPlates} combinations={this.state.combinations}/>;
-					{this.state.combinations ? <Combinations combinations={this.state.combinations} /> : null}
+					{this.state.combinations.length > 0 ? <Combinations combinations={this.state.combinations} /> : null}
 					<CrystalPlates 
 						crystalPlates={this.state.crystalPlates} 
 						resizeAndRefresh={this.resizeAndRefresh}

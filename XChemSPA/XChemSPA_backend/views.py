@@ -59,7 +59,7 @@ def import_compounds(request):
 def import_new_crystals(request):
     if request.method == "POST":
         if import_crystals_form_is_valid(request.POST)["valid"]:
-            print(request.POST)
+           
             name = request.POST.get("barcode", False)
             drop_volume = float(request.POST.get("drop_volume", False))
             plate_type = request.POST.get("plate_type", False)

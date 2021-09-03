@@ -11,6 +11,7 @@ export default class Visit extends Component {
 
 
     componentDidUpdate(prevProps, prevState){
+        //this.props.switchActive("visit");
         if (prevState.proposal !== this.state.proposal){
             this.handleProposalData();
         }
@@ -24,7 +25,7 @@ export default class Visit extends Component {
             return false;
         }
         else{
-            return m[1]; //returns Proposal.proposal
+            return m[1]; //returns proposal string
         }
     }
 	
@@ -76,7 +77,7 @@ export default class Visit extends Component {
         }
         return (
             <main>
-                <h1>Enter proposal</h1>
+                <h1>Enter visit</h1>
                 <div>
                     <label>Visit: </label>
                     <input onChange={() => this.getVisitString(event.target.value)} type="text" name="visit" />

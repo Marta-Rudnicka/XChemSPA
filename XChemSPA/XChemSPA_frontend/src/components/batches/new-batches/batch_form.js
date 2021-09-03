@@ -83,16 +83,8 @@ export class BatchForm extends Component {
 							step="16" 
 							value={this.state.crystalsPerBatch} 
 							onChange={() => {return}} //dummy function to silence warnings; changes handled by the parent div
-							/> crystals per plate</label>
+							/> crystals per batch</label>
 					</div>
-				  </fieldset>
-				</form>
-				
-				<form id="soak-type-form" className={this.state.formClass}>
-				  <fieldset>
-					<legend>Choose soak type: </legend>
-					<input type="radio" name="soak-type" id="single" value="single" onClick={() => this.pickSingleSoak()} defaultChecked />
-					<label htmlFor="single">One compound per crystal</label>
 				  </fieldset>
 				</form>
 			</section>

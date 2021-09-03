@@ -19,17 +19,13 @@ export default class Match {
 	}
 
 	resetLibraryPlate(){
-		console.log('fired resetLibraryPlate')
 		this.libraryPlate = null;
 		this.empty();
-		console.log(this.size)
 		this.checkIntegrity();
 	}
 	resetCrystalPlate(){
-		console.log('fired resetCrystalPlate')
 		this.crystalPlate = null;
 		this.empty();
-		console.log(this.size)
 		this.checkIntegrity();
 	}
 
@@ -80,7 +76,6 @@ export default class Match {
 
 	addItems(int){
 		this.size = this.size + int;
-		console.log('adding items: ', int, this.libraryPlate.name)
 		const items = this.getItemsList(int)
 		this.compounds.push(...items.c);
 		this.crystals.push(...items.x);

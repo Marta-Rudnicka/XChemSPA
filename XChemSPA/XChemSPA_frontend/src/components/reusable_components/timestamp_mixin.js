@@ -4,7 +4,6 @@ export function timestampMixin(component) {
     return class timestampMixinClass extends component{
 
         printDate(date){
-            console.log('test changes in printDate')
             if (!date){
                 return null;
             }

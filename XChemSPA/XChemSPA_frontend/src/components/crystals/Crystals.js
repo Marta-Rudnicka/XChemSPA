@@ -86,7 +86,6 @@ class Crystals extends React.Component {
 		for (let i = 0; i < platesCopy.length; i++) {
 			if(platesCopy[i].id === plate_id){
 				const crystal = platesCopy[i].crystals.find(crystal => crystal.well === well);
-				console.log(crystal.well, crystal.score)
 				crystal.score = score;
 				break;
 			}
@@ -151,22 +150,16 @@ class Crystals extends React.Component {
 	}
 
 	updateStatus(crystal, score, status){
-		console.log('updateStatus: ', crystal, score, status)
 		if (isNaN(parseInt(score)) && crystal.score === score){
-			console.log('Nan score')
 			return changeAndTrack(crystal, "status", status);
 		}
-		console.log('number score')
 		if (status==="rejected" && crystal.score < score){
-			console.log('not enough')
 			return changeAndTrack(crystal, "status", status);
 		}
 		else if (status === "accepted" && crystal.score > score){
-			console.log('good enough')
 			return changeAndTrack(crystal, "status", status);
 		}
 		else {
-			console.log('nothing to change')
 			return false;
 		}
 	}

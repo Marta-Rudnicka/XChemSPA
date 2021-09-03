@@ -4,9 +4,9 @@
 This Django project is a part of a larger XChemSPA application, and it is meant to coordinate data exchange while crystals are soaked, harvested and mounted. The compound selection part is covered by [webSoakDB: ](https://github.com/Marta-Rudnicka/webSoakDB/tree/main/documentation). The technologies used are the same, except this application does not use RDkit or bokeh.
 
 Unlike the webSoakDB documentation, this documentation details is organised mostly by functionality, not by django app.
-[What XChemSPA does](#exp)
-[Django apps and other directories](#apps)
-[Data models](#models)
+- [What XChemSPA does](#exp)
+- [Django apps and other directories](#apps)
+- [Data models](#models)
 
 ## Outline of the processes managed by XChemSPA <a name="exp"></a>
 

@@ -92,17 +92,10 @@ class Plate extends React.Component {
 		let usedList = [];
 		let acceptedList = [];
 		let rejectedList = [];
-		try {
-//			usedList = this.state.crystals.filter(crystal => crystal.status === 'used');
-//			acceptedList = this.state.crystals.filter(crystal => crystal.status === 'accepted');
-//			rejectedList = this.state.crystals.filter(crystal => crystal.status === 'rejected');
-			usedList = this.props.plate.crystals.filter(crystal => crystal.status === 'used');
-			acceptedList = this.props.plate.crystals.filter(crystal => crystal.status === 'accepted');
-			rejectedList = this.props.plate.crystals.filter(crystal => crystal.status === 'rejected');
-		}
-		catch(TypeError){
-			usedList = [];
-		}
+		usedList = this.props.plate.crystals.filter(crystal => crystal.status === 'used');
+		acceptedList = this.props.plate.crystals.filter(crystal => crystal.status === 'accepted');
+		rejectedList = this.props.plate.crystals.filter(crystal => crystal.status === 'rejected');
+		
 		const plateName = this.props.plate.name;
 		
 		let sectionClass;

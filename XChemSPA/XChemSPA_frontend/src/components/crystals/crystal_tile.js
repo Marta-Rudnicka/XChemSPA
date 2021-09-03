@@ -65,20 +65,10 @@ class CrystalTile extends React.Component {
 		super(props);
 		this.showInfo = this.showInfo.bind(this);
 		this.hideInfo = this.hideInfo.bind(this);
-		this.rejectCrystal = this.rejectCrystal.bind(this);
-		this.acceptCrystal = this.acceptCrystal.bind(this);
 		
 		this.state = {
 			showInfo: false
 		}
-	}
-
-	rejectCrystal(){
-		console.log('clicked icon rejectCrystal');
-	}
-
-	acceptCrystal(){
-		console.log('clicked icon acceptCrystal');
 	}
 
 	showInfo(){

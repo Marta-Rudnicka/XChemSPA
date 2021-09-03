@@ -116,13 +116,13 @@ class Sidebar extends React.Component {
 						
 						  	<label>Remove crystals with number score lower than:</label>
 							<div  className="col-sm-10">
-								<input type="number" min="0" value={rejectLimit} onChange={this.handleRejectLimitChange} className="form-control"/>
+								<input type="number" min="0" max="9" value={rejectLimit} onChange={this.handleRejectLimitChange} className="form-control"/>
 							</div>
 						
 
 							<label>Add crystals with number score higher than:</label>
 							<div  className="col-sm-10">
-							  <input type="number" min="0" value={acceptLimit} onChange={this.handleAcceptLimitChange} className="form-control"/>
+							  <input type="number" min="0" max="9" value={acceptLimit} onChange={this.handleAcceptLimitChange} className="form-control"/>
 							</div>
 
 							<label>Remove crystals with letter score:</label>

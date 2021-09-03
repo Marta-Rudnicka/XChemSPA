@@ -92,7 +92,6 @@ export class BatchRowSoak extends timestampMixin(ExistingBatchRow) {
 	}
 	
 	measureTime(){
-		console.log('fired measureTime')
 		setInterval(()=>{
 			if(this.props.batch.status === "soaking"){
 				const delta = new Date() - this.state.transferTime;

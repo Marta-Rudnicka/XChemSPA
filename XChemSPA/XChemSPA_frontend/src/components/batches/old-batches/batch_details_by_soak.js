@@ -13,7 +13,6 @@ export class BatchDetailsBySoak extends Component {
 		let soaks = 0;
 	
 		this.props.crystals.forEach(crystal =>{
-			console.log('crystal: ', crystal)
 			if (crystal.compound_combination.compounds.length > soaks){
 				soaks = crystal.compound_combination.compounds.length;
 			}
